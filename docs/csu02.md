@@ -1,4 +1,4 @@
-# CSU02: Autenticação de Usuário
+# CSU02: Autenticar Usuário
 
 **Sumário:** Usuário utiliza o sistema para fazer a autenticação e ter acesso à aplicação.
 
