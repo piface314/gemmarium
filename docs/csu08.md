@@ -1,23 +1,27 @@
-# CSU08: Propor Troca
+## CSU08: Responder Proposta de Troca
 
-**Sumário:** O Usuário Proponente utiliza o sistema para propor trocas com outro usuário.
+**Sumário:** O Usuário A utiliza o sistema para prosseguir com a negociação da troca com Usuário B.
 
-**Ator primário:** Usuário Proponente.
+**Ator primário:** Usuário A.
 
-**Ator secundário:** Usuário Proposto.
+**Ator secundário:** Usuário B.
 
-**Precondições:** O Usuário Proponente deve estar autenticado no sistema.
+### Fluxo Principal
+1. Na tela principal, o sistema apresenta as solicitações de troca pendentes para o Usuário A.
+2. O Usuário A seleciona uma solicitação de troca.
+3. O sistema apresenta a mensagem enviada pelo Usuário B, uma listagem do nome das gemas oferecidas e as de interesse do Usuário B, essa mesma listagem, porém editável, referente ao Usuário A, e botões para rejeitar, aceitar ou negociar a proposta.
+4. O Usuário A pode incluir gemas de sua coleção para preencher a listagem de suas gemas oferecidas, e também pode alterar as gemas que listou de interesse.
+5. O Usuário A aceita a proposta.
+6. O sistema envia ao Usuário B todos os dados das gemas oferecidas pelo Usuário A, e, quando receber as gemas do Usuário B, armazena seus dados.
+7. O sistema encerra o caso de uso.
 
-## Fluxo Principal:
-1. O Usuário Proponente acessa a galeria de um outro usuário e solicita propor uma troca.
-2. O sistema apresenta a coleção do Usuário Proponente.
-3. O Usuário Proponente seleciona quais gemas de sua coleção ele deseja oferecer na troca, e confirma.
-4. O sistema volta para a galeria do Usuário Proposto.
-5. O Usuário Proponente seleciona quais gemas do Usuário Proposto ele possui interesse na troca, e confirma.
-6. O sistema apresenta um campo de texto, um botão para submeter a solicitação de troca, e um botão de cancelar.
-7. O Usuário Proponente insere uma mensagem que deseja enviar ao Usuário Proposto junto com a solicitação de troca.
-8. O sistema apresenta uma caixa de diálogo confirmando se o Usuário Proponente realmente deseja realizar a solicitação.
-9. Caso o Usuário Proponente confirme a troca, o sistema envia a solicitação de troca ao Usuário Proposto.
-10. O sistema encerra o caso de uso.
+### Fluxo Alternativo (5): Usuário A rejeita a troca
+- Caso o Usuário A rejeite a troca, o sistema apaga a solicitação, comunica a rejeição ao Usuário B, e encerra o caso de uso.
 
-**Pós-condições:** a solicitação de troca foi enviada e ficou como pendente para o Usuário Proposto.
+### Fluxo Alternativo (5): Usuário A negocia a troca
+- Caso o Usuário A decida negociar a troca, o sistema exibe uma caixa de texto para compor uma mensagem ao Usuário B.
+- O Usuário A escreve uma mensagem.
+- O sistema envia ao Usuário B essa mensagem junto da lista atualizada de nomes das gemas oferecidas e de interesse.
+- O sistema encerra o caso de uso.
+
+**Pós-condições:** A solicitação de troca foi rejeitada e removida das propostas pendentes, ou foi aceita, e as gemas foram devidamente trocadas entre os Usuários.
