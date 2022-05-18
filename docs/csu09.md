@@ -1,20 +1,18 @@
 ## CSU09: Concluir Troca
 
-**Sumário:** O Usuário A utiliza o sistema para encerrar uma troca rejeitada ou aceita pelo Usuário B.
+**Sumário:** O Usuário aceita ou rejeita uma troca com outro usuário, encerrando-a.
 
-**Ator primário:** Usuário A.
+**Ator primário:** Usuário.
 
-**Ator secundário:** Usuário B.
+**Precondições:** Existe(m) troca(s) pendente(s) para o Usuário.
 
 ### Fluxo Principal
-1. Na tela principal, o sistema apresenta as solicitações de troca rejeitadas ou aceitas para o Usuário A.
-2. O Usuário A seleciona uma solicitação de troca.
-3. Caso a troca tenha sido aceita, o sistema apresenta as gemas enviadas pelo Usuário B, a listagem de gemas que Usuário B deseja, e a coleção do Usuário A.
-4. O Usuário A escolhe as gemas de sua coleção para enviar ao Usuário B.
-5. O sistema envia as gemas para o Usuário B.
-6. O sistema encerra o caso de uso.
+1. O Usuário está visualizando uma troca em aberto.
+2. O Usuário aceita a troca.
+3. O sistema envia todos os dados das gemas oferecidas para o outro usuário.
+4. O sistema encerra o caso de uso.
 
-### Fluxo Alternativo (3): Troca rejeitada
-- Caso a troca tenha sido rejeitada, o sistema exibe um aviso e apaga a solicitação de troca, encerrando o caso de uso.
+### Fluxo Alternativo (2): Usuario rejeita a troca.
+- Caso o Usuário rejeite a troca, o sistema notifica o outro usuário da rejeição, apaga a proposta de troca e encerra o caso de uso.
 
-**Pós-condições:** A solicitação de troca rejeitada foi removida das propostas pendentes, ou a troca aceita foi respondida, e as gemas foram devidamente enviadas ao Usuário B.
+**Pós-condições:** A troca foi rejeitada ou aceita, e no segundo caso, as gemas oferecidas foram enviadas ao outro usuário.

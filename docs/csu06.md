@@ -1,6 +1,6 @@
 ## CSU06: Pesquisar Galeria
 
-**Sumário:** O Usuário utiliza o sistema para encontrar usuários, de acordo com os critérios desejados.
+**Sumário:** O Usuário tenta encontrar outros usuários, de acordo com os critérios desejados.
 
 **Ator primário:** Usuário.
 

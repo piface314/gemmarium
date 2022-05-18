@@ -1,6 +1,6 @@
 ## CSU03: Visualizar Gema
 
-**Sumário:** O Usuário utiliza o sistema para visualizar os dados de uma gema específica de sua coleção.
+**Sumário:** O Usuário visualiza os dados de uma gema específica de sua coleção.
 
 **Ator primário:** Usuário.
 

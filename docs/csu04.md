@@ -1,6 +1,6 @@
 ## CSU04: Obter Gemas Sorteadas
 
-**Sumário:** O Usuário utiliza o sistema para obter novas gemas sorteadas.
+**Sumário:** O Usuário obtém novas gemas sorteadas.
 
 **Ator primário:** Usuário.
 

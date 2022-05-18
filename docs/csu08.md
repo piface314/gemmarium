@@ -1,27 +1,17 @@
-## CSU08: Responder Proposta de Troca
+## CSU08: Negociar Troca
 
-**Sumário:** O Usuário A utiliza o sistema para prosseguir com a negociação da troca com Usuário B.
+**Sumário:** O Usuário dá prosseguimento à negociação da troca com outro usuário.
 
-**Ator primário:** Usuário A.
+**Ator primário:** Usuário.
 
-**Ator secundário:** Usuário B.
+**Precondições:** Existe(m) troca(s) pendente(s) para o Usuário.
 
 ### Fluxo Principal
 1. Na tela principal, o sistema apresenta as solicitações de troca pendentes para o Usuário A.
-2. O Usuário A seleciona uma solicitação de troca.
-3. O sistema apresenta a mensagem enviada pelo Usuário B, uma listagem do nome das gemas oferecidas e as de interesse do Usuário B, essa mesma listagem, porém editável, referente ao Usuário A, e botões para rejeitar, aceitar ou negociar a proposta.
-4. O Usuário A pode incluir gemas de sua coleção para preencher a listagem de suas gemas oferecidas, e também pode alterar as gemas que listou de interesse.
-5. O Usuário A aceita a proposta.
-6. O sistema envia ao Usuário B todos os dados das gemas oferecidas pelo Usuário A, e, quando receber as gemas do Usuário B, armazena seus dados.
-7. O sistema encerra o caso de uso.
+2. O Usuário seleciona uma solicitação de troca.
+3. O sistema apresenta o estado atual da negociação, exibindo as mensagens trocadas entre os usuários, e as listas de nomes de gemas que cada um está disposto a oferecer e em quais tem interesse. 
+4. O Usuário pode escrever novas mensagens ao outro usuário ou também editar sua lista de gemas ofertadas/interessadas.
+5. O sistema envia cada mensagem ou alteração para o outro usuário.
+6. O sistema encerra o caso de uso.
 
-### Fluxo Alternativo (5): Usuário A rejeita a troca
-- Caso o Usuário A rejeite a troca, o sistema apaga a solicitação, comunica a rejeição ao Usuário B, e encerra o caso de uso.
-
-### Fluxo Alternativo (5): Usuário A negocia a troca
-- Caso o Usuário A decida negociar a troca, o sistema exibe uma caixa de texto para compor uma mensagem ao Usuário B.
-- O Usuário A escreve uma mensagem.
-- O sistema envia ao Usuário B essa mensagem junto da lista atualizada de nomes das gemas oferecidas e de interesse.
-- O sistema encerra o caso de uso.
-
-**Pós-condições:** A solicitação de troca foi rejeitada e removida das propostas pendentes, ou foi aceita, e as gemas foram devidamente trocadas entre os Usuários.
+**Pós-condições:** O estado da negociação da troca foi alterado, tendo adicionado novas mensagens ou atualizado as listas de gemas.

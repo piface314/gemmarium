@@ -1,6 +1,6 @@
 ## CSU02: Visualizar Coleção
 
-**Sumário:** O Usuário utiliza o sistema para visualizar sua própria coleção de gemas.
+**Sumário:** O Usuário visualiza sua própria coleção de gemas.
 
 **Ator primário:** Usuário.
 
