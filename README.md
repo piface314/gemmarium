@@ -10,4 +10,7 @@ Para executar o lado cliente, certificar que o `python` e o `pip` estão instala
 
 Acesse a pasta `client` e instale as dependências:
 
-    $ cd client && python -m virtualenv .venv && source .venv/bin/activate && pip install -r requirements.txt
+    $ cd client && \
+      python -m virtualenv .venv && \
+      source .venv/bin/activate && \
+      pip install -r requirements.txt
