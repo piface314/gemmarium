@@ -1,0 +1,237 @@
+{
+  "gems": {
+    "alexandrite": {
+      "name": "Alexandrita",
+      "desc": " ",
+      "rarity": 0
+    },
+    "amazonite": {
+      "name": "Amazonita",
+      "desc": "  ",
+      "rarity": 0
+    },
+    "amber": {
+      "name": "Âmbar",
+      "desc": "   ",
+      "rarity": 10
+    },
+    "amethyst": {
+      "name": "Ametista",
+      "desc": "  ",
+      "rarity": 100
+    },
+    "aquamarine": {
+      "name": "Água-Marinha",
+      "desc": " ",
+      "rarity": 10
+    },
+    "bismuth": {
+      "name": "Bismuto",
+      "desc": " ",
+      "rarity": 10
+    },
+    "blue-diamond": {
+      "name": "Diamante Azul",
+      "desc": " ",
+      "rarity": 1
+    },
+    "emerald": {
+      "name": "Esmeralda",
+      "desc": " ",
+      "rarity": 10
+    },
+    "fluorite": {
+      "name": "Fluorita",
+      "desc": " ",
+      "rarity": 10
+    },
+    "garnet": {
+      "name": "Granada",
+      "desc": " ",
+      "rarity": 50
+    },
+    "green-quartz": {
+      "name": "Quartzo Verde",
+      "desc": " ",
+      "rarity": 50
+    },
+    "jade": {
+      "name": "Jade",
+      "desc": " ",
+      "rarity": 20
+    },
+    "jasper": {
+      "name": "Jaspe",
+      "desc": " ",
+      "rarity": 50
+    },
+    "lapis-lazuli": {
+      "name": "Lápis-Lazúli",
+      "desc": " ",
+      "rarity": 50
+    },
+    "malachite": {
+      "name": "Malaquita",
+      "desc": " ",
+      "rarity": 0
+    },
+    "obsidian": {
+      "name": "Obsidiana",
+      "desc": " ",
+      "rarity": 0
+    },
+    "opal": {
+      "name": "Opala",
+      "desc": " ",
+      "rarity": 0
+    },
+    "padparadscha": {
+      "name": "Padparadscha",
+      "desc": " ",
+      "rarity": 10
+    },
+    "pearl": {
+      "name": "Pérola",
+      "desc": " ",
+      "rarity": 100
+    },
+    "peridot": {
+      "name": "Peridoto",
+      "desc": " ",
+      "rarity": 100
+    },
+    "pink-diamond": {
+      "name": "Diamante Rosa",
+      "desc": " ",
+      "rarity": 1
+    },
+    "rainbow-quartz": {
+      "name": "Quartzo Arco-Íris",
+      "desc": " ",
+      "rarity": 0
+    },
+    "rhodonite": {
+      "name": "Rodonita",
+      "desc": " ",
+      "rarity": 10
+    },
+    "rose-quartz": {
+      "name": "Quartzo Rosa",
+      "desc": " ",
+      "rarity": 100
+    },
+    "ruby": {
+      "name": "Rubi",
+      "desc": " ",
+      "rarity": 100
+    },
+    "rutile": {
+      "name": "Rutilo",
+      "desc": " ",
+      "rarity": 10
+    },
+    "sapphire": {
+      "name": "Safira",
+      "desc": " ",
+      "rarity": 100
+    },
+    "sardonyx": {
+      "name": "Sardônix",
+      "desc": " ",
+      "rarity": 0
+    },
+    "smoky-quartz": {
+      "name": "Quartzo Fumê",
+      "desc": " ",
+      "rarity": 0
+    },
+    "spinel": {
+      "name": "Espinela",
+      "desc": " ",
+      "rarity": 0
+    },
+    "sugilite": {
+      "name": "Sugilita",
+      "desc": " ",
+      "rarity": 0
+    },
+    "sunstone": {
+      "name": "Heliolita",
+      "desc": " ",
+      "rarity": 0
+    },
+    "topaz": {
+      "name": "Topázio",
+      "desc": " ",
+      "rarity": 20
+    },
+    "white-diamond": {
+      "name": "Diamante Branco",
+      "desc": " ",
+      "rarity": 1
+    },
+    "yellow-diamond": {
+      "name": "Diamante Amarelo",
+      "desc": " ",
+      "rarity": 1
+    }
+  },
+  "fusions": {
+    "alexandrite": [
+      "amethyst",
+      "ruby",
+      "pearl",
+      "sapphire"
+    ],
+    "amazonite": [
+      "lapis-lazuli",
+      "green-quartz"
+    ],
+    "garnet": [
+      "ruby",
+      "sapphire"
+    ],
+    "malachite": [
+      "jasper",
+      "lapis-lazuli"
+    ],
+    "obsidian": [
+      "rose-quartz",
+      "pearl",
+      "ruby",
+      "amethyst",
+      "sapphire"
+    ],
+    "opal": [
+      "amethyst",
+      "pearl"
+    ],
+    "rainbow-quartz": [
+      "rose-quartz",
+      "pearl"
+    ],
+    "rhodonite": [
+      "ruby",
+      "pearl"
+    ],
+    "sardonyx": [
+      "ruby",
+      "pearl",
+      "sapphire"
+    ],
+    "smoky-quartz": [
+      "amethyst",
+      "rose-quartz"
+    ],
+    "sugilite": [
+      "amethyst",
+      "ruby",
+      "sapphire"
+    ],
+    "sunstone": [
+      "ruby",
+      "rose-quartz",
+      "sapphire"
+    ]
+  }
+}

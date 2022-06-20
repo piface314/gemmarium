@@ -1,5 +1,6 @@
 from auth_ctrl import AuthCtrl
 from database import Database
+from nacl.encoding import RawEncoder
 from sys import argv
 import keys
 
@@ -13,5 +14,6 @@ if __name__ == '__main__':
         public_key=keys.vault_pkey,
         db=db
     )
-    auth_ctrl.trust_key(forge_addr, keys.forge_pkey)
+    auth_ctrl.trust_key(forge_addr, keys.forge_pkey, RawEncoder)
+    auth_ctrl.learn_host(forge_addr)
     auth_ctrl.run()

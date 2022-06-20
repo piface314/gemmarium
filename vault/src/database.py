@@ -15,7 +15,7 @@ class Database:
         self.__lock = threading.Lock()
         with open('res/create.sql') as f:
             sql = f.read()
-            db.execute(sql)
+            db.executescript(sql)
             db.commit()
     
     def __connect(self):
@@ -29,10 +29,12 @@ class Database:
             db.execute('INSERT INTO user VALUES (?, ?)',
                             (username, public_key))
             db.commit()
+            db.close()
             return True
 
     def get_user(self, username):
         db = self.__connect()
         c = db.execute(self.__user_query, (username,))
         u = c.fetchone()
+        db.close()
         return None if u is None else User(*u)

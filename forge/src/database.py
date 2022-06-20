@@ -13,7 +13,7 @@ class Database:
         db = self.__connect()
         with open('res/create.sql') as f:
             sql = f.read()
-            db.execute(sql)
+            db.executescript(sql)
             db.commit()
 
     def __connect(self):
@@ -25,9 +25,11 @@ class Database:
             db.execute('INSERT OR REPLACE INTO quota VALUES (?, ?)',
                        (username, last_request_at))
             db.commit()
+            db.close()
 
     def get_quota(self, username):
         db = self.__connect()
         c = db.execute('SELECT * FROM quota WHERE username = ?', (username,))
         q = c.fetchone()
+        db.close()
         return None if q is None else Quota(q[0], datetime.fromisoformat(q[1]))
