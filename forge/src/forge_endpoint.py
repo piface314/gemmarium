@@ -1,4 +1,4 @@
-from nacl.encoding import Base64Encoder, RawEncoder
+from nacl.encoding import Base64Encoder
 from server import Server
 import socket
 
@@ -11,7 +11,7 @@ class ForgeEndpoint(Server):
         self.addr = addr
         self.ctrl = ctrl
         self.vault_addr = vault_addr
-        self.trust_key(vault_addr, vault_pkey, RawEncoder)
+        self.trust_key(vault_addr, vault_pkey)
 
     def connect_vault(self, port):
         self.vault_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,9 +35,12 @@ class ForgeEndpoint(Server):
             return
         print(f"Thread@{addr}: choosing gem...")
         gem = self.ctrl.choose_gem(username)
-        print(f"Thread@{addr}: sending gem {gem['name']}...")
-        conn.sendall(self.enc_msg(addr, "gem", **gem))
+        print(f"Thread@{addr}: sending gem...")
+        conn.sendall(self.enc_msg(addr, "gem", gem=gem))
         self.ctrl.set_quota(username)
+    
+    def handle_fusion(self, conn, addr, username, gems, **args):
+        pass
 
     def auth(self, addr, username):
         msg = self.enc_msg(self.vault_addr, "key", username=username)

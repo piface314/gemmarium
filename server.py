@@ -1,4 +1,4 @@
-from nacl.public import PrivateKey, PublicKey, Box, SealedBox
+from nacl.public import PublicKey, Box, SealedBox
 from nacl.encoding import Base64Encoder, RawEncoder
 from nacl.exceptions import CryptoError
 import json
@@ -14,8 +14,8 @@ class UnauthorizedError(Exception):
 class Server:
 
     def __init__(self, private_key, public_key):
-        self.__private_key = PrivateKey(private_key)
-        self.__public_key = PublicKey(public_key)
+        self.__private_key = private_key
+        self.__public_key = public_key
         self.__buffer_size = 1024
         self.__trusted_keys = {}
         self.__known_keys = {}
