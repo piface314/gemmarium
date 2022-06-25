@@ -1,10 +1,16 @@
 #:import Bar view.component.bar.Bar
 
 <WaitLabel@Label>:
-    text: '0'
-    font_size: 60
+    text: '0:00:00'
+    font_size: 50
     pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-    
+
+<GemBase@Image>:
+    source: 'res/base.png'
+    allow_stretch: True
+    size_hint: 0.6, 0.6
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
 
 <RequestScreen>:
     BoxLayout:
@@ -28,6 +34,13 @@
                             rgba: .2, .2, .2, 1
                         Ellipse:
                             size: self.size
+            Label:
+                text: root.msg
+                size_hint: 1, None
+                font_size: 16
+                text_size: self.size[0], None 
+                valign: 'middle'
+                halign: 'center'
             Button:
                 id: request_btn
                 text: 'Solicitar gema'

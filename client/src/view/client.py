@@ -72,3 +72,5 @@ class ClientApp(App):
             'accept': TextureRegion(16, 0, 16, 16, tx),
             'fusion': TextureRegion(32, 0, 16, 16, tx),
         }
+        self.gem_base = Image('res/base.png').texture
+        self.gem_base.mag_filter = 'nearest'
