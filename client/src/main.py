@@ -45,6 +45,8 @@ if __name__ == '__main__':
     search_endp.set_keys(skey, pkey)
     trade_endp.set_keys(skey, pkey)
 
+    collection_ctrl.load()
+
     Config.set('graphics', 'width', 378)
     Config.set('graphics', 'height', 672)
     Config.set('graphics', 'resizable', 0)

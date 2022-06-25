@@ -1,11 +1,56 @@
 #:import Bar view.component.bar.Bar
+#:set gem_size 96
+
+<GemHolder>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2 if self.state == 'down' else 0
+        Rectangle:
+            pos: 0, -10
+            size: self.size
+    Image:
+        source: 'res/base.png'
+        allow_stretch: True
+        size_hint: 1, 1
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+<GemShow@Popup>:
+    size_hint: 0.9, 0.75
+    auto_dismiss: True
+    title_align: 'center'
+    title: ''
+    text: ''
+    BoxLayout:
+        id: layout
+        orientation: 'vertical'
+        padding: sp(10)
+        spacing: sp(20)
+        Label:
+            text: 'Descrição:'
+            halign: 'center'
+            size_hint: 1, None
+        Label:
+            text: root.text
+            halign: 'center'
 
 <CollectionScreen>:
     BoxLayout:
         orientation: 'vertical'
         Bar:
+            id: header
             title: "Coleção"
             bgcolor: (.2, .2, .2, 1)
             size_hint: None, None
-        Widget:
-            size_hint: 1, 1
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            GridLayout:
+                id: gem_list
+                size_hint_y: None
+                height: self.minimum_height
+                cols: root.size[0] // gem_size
+                row_default_height: gem_size
+                col_default_height: gem_size
+                spacing: sp(10)
+                padding: sp(10)
+
