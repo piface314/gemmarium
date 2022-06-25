@@ -89,22 +89,23 @@ class Server:
     def handle(self, conn, addr, keep):
         print(f"Thread@{addr}: connected")
         try:
-            while True:
-                try:
+            with conn:
+                while True:
+                    try:
+                        if not keep:
+                            self.recv_key(conn, addr)
+                        payload = conn.recv(self.__buffer_size)
+                        op, args = self.dec_msg(addr, payload)
+                        handler = self.__getattribute__("handle_" + op)
+                        handler(conn, addr, **args)
+                    except AttributeError:
+                        conn.sendall(self.enc_msg(addr, "error", code="UnknownOperation"))
+                    except UnauthorizedError:
+                        conn.sendall(self.enc_msg(addr, "error", code="Unauthorized"))
+                    except Exception as e:
+                        print(e)
+                        conn.sendall(self.enc_msg(addr, "error", code="UnknownError"))
                     if not keep:
-                        self.recv_key(conn, addr)
-                    payload = conn.recv(self.__buffer_size)
-                    op, args = self.dec_msg(addr, payload)
-                    handler = self.__getattribute__("handle_" + op)
-                    handler(conn, addr, **args)
-                except AttributeError:
-                    conn.sendall(self.enc_msg(addr, "error", code="UnknownOperation"))
-                except UnauthorizedError:
-                    conn.sendall(self.enc_msg(addr, "error", code="Unauthorized"))
-                except Exception as e:
-                    print(e)
-                    conn.sendall(self.enc_msg(addr, "error", code="UnknownError"))
-                if not keep:
-                    break
+                        break
         except BrokenPipeError:
             print(f"Thread@{addr}: disconnected")

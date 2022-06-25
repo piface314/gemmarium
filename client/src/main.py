@@ -1,7 +1,62 @@
+from ctrl.collection import CollectionCtrl
+from ctrl.profile import ProfileCtrl
+from ctrl.search import SearchCtrl
+from ctrl.trade import TradeCtrl
+from kivy.config import Config
 from model import Model
+from nacl.public import PublicKey, PrivateKey
+from nacl.signing import VerifyKey
+from network.collection import CollectionEndpoint
+from network.profile import ProfileEndpoint
+from network.search import SearchEndpoint
+from network.trade import TradeEndpoint
+from sys import argv
+from view.client import ClientApp
+import keys
+
 
 
 if __name__ == '__main__':
-    Model.set_db_fp('client.db')
+    vault_addr = (argv[1], int(argv[2]))
+    forge_addr = (argv[3], int(argv[4]))
+    gallery_addr = ("", 0)
+    search_addr = (argv[5], int(argv[6]))
+    
+    vault_pkey = PublicKey(keys.vault_pkey)
+    forge_pkey = PublicKey(keys.forge_pkey)
+    forge_vkey = VerifyKey(keys.forge_vkey)
+
+    Model.set_db_fp(argv[7])
     Model.create_db('res/create.sql')
+
+    profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
+    profile_ctrl = ProfileCtrl(profile_endp)
+    search_endp = SearchEndpoint(gallery_addr, search_addr, None)
+    search_ctrl = SearchCtrl(search_endp)
+    collection_endp = CollectionEndpoint(forge_addr, forge_pkey, forge_vkey)
+    collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp)
+    trade_endp = TradeEndpoint(forge_vkey)
+    trade_ctrl = TradeCtrl(collection_ctrl, trade_endp)
+
+    profile_ctrl.load()
+    skey, pkey = profile_ctrl.get_keys()
+    collection_endp.set_keys(skey, pkey)
+    profile_endp.set_keys(skey, pkey)
+    search_endp.set_keys(skey, pkey)
+    trade_endp.set_keys(skey, pkey)
+
+    Config.set('graphics', 'width', 378)
+    Config.set('graphics', 'height', 672)
+    Config.set('graphics', 'resizable', 0)
+    Config.set('kivy', 'default_font', [
+        'res/regular.ttf',
+        'res/bold.ttf',
+    ])
+    ClientApp(
+        collection_ctrl,
+        profile_ctrl,
+        search_ctrl,
+        trade_ctrl
+    ).run()
+
 

@@ -1,0 +1,36 @@
+#:import Bar view.component.bar.Bar
+
+<WaitLabel@Label>:
+    text: '0'
+    font_size: 60
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    
+
+<RequestScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Bar:
+            id: header
+            title: "Obter"
+            bgcolor: (.2, .2, .2, 1)
+            size_hint: None, None
+        BoxLayout:
+            orientation: 'vertical'
+            padding: sp(20)
+            RelativeLayout:
+                RelativeLayout:
+                    id: display
+                    size_hint: None, None
+                    size: self.parent.size[0]-sp(40), self.parent.size[0]-sp(40)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    canvas:
+                        Color:
+                            rgba: .2, .2, .2, 1
+                        Ellipse:
+                            size: self.size
+            Button:
+                id: request_btn
+                text: 'Solicitar gema'
+                size_hint: 1, None
+                on_release: root.request()
+                disabled: root.time > 0

@@ -58,5 +58,5 @@ class ForgeCtrl:
         return base64.b64encode(blob).decode('utf-8')
 
     def get_uuid(self):
-        return base64.b64encode(uuid.uuid4().bytes).decode('utf-8')
+        return str(uuid.uuid4())
 

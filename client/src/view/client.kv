@@ -1,8 +1,7 @@
-
-<PongGame>:
-    canvas:
-        Color: 
-            rgba: 0.5, 0.5, 0.5, 0.5
-        Ellipse:
+<Screen>:
+    on_leave: app.screen_history.append(self.name)
+    canvas.before:
+        Color:
+            rgba: (0, 0, 0, 1)
+        Rectangle:
             size: self.size
-            pos: self.pos

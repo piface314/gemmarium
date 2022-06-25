@@ -12,8 +12,8 @@ class Model:
         db = cls.connect()
         with open(sql_fp) as f:
             db.executescript(f.read())
-            db.commit()
-            db.close()
+        db.commit()
+        db.close()
 
     @classmethod
     def connect(cls):

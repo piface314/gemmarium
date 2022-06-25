@@ -1,0 +1,31 @@
+<MenuScreen>:
+    logo: Sprite.from_file('res/logo.png', rects)
+    on_enter: self.username = app.profile_ctrl.get_username()
+    BoxLayout:
+        id: box_layout
+        orientation: 'vertical'
+        padding: '20sp'
+        spacing: '10sp'
+        Label:
+            bold: True
+            text: f'@{root.username}'
+            font_size: 20
+            halign: 'center'
+            valign: 'middle'
+            size_hint: 1, 0.15
+        Button:
+            text: 'Coleção'
+            size_hint: 1, 0.15
+            on_release: root.manager.current = 'collection'
+        Button:
+            text: 'Obter'
+            size_hint: 1, 0.15
+            on_release: root.manager.current = 'request'
+        Button:
+            text: 'Buscar'
+            size_hint: 1, 0.15
+            on_release: root.manager.current = 'search'
+        Button:
+            text: 'Trocas'
+            size_hint: 1, 0.15
+            on_release: root.manager.current = 'trade_list'

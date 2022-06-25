@@ -1,0 +1,21 @@
+<Loading@Popup>:
+    size_hint: 0.9, 0.3
+    auto_dismiss: False
+    title: ''
+    Label:
+        text: 'Carregando...'
+        halign: 'center'
+        valign: 'middle'
+
+<Warning@Popup>:
+    size_hint: 0.9, 0.3
+    auto_dismiss: True
+    title: 'Erro'
+    text: ''
+    Label:
+        text: root.text
+        halign: 'center'
+        valign: 'middle'
+        text_size: self.parent.width-10, None
+        size: self.texture_size
+      

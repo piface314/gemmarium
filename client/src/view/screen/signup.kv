@@ -1,0 +1,20 @@
+#:import Sprite view.component.sprite.Sprite
+#:import rects view.component.sprite.logo_rects
+
+<SignupScreen>:
+    logo: Sprite.from_file('res/logo.png', rects)
+    BoxLayout:
+        id: box_layout
+        orientation: 'vertical'
+        padding: '20sp'
+        spacing: '20sp'
+        TextInput:
+            id: text_input
+            hint_text: 'Nome de usuário...'
+            multiline: False
+            size_hint: (1, None)
+            on_text_validate: root.signup()
+        Button:
+            text: 'Cadastrar'
+            size_hint: 1, None
+            on_release: root.signup()

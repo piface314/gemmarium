@@ -4,7 +4,9 @@ from model.misc import GemList, SearchResult
 
 class SearchEndpoint:
 
-    def __init__(self, gallery_key: PublicKey):
+    def __init__(self, gallery_addr, search_addr, gallery_key: PublicKey):
+        self.__gallery_addr = gallery_addr
+        self.__search_addr = search_addr
         self.__gallery_key = gallery_key
 
     def set_keys(self, skey: PrivateKey, pkey: PublicKey):

@@ -20,9 +20,9 @@ class Database:
         return sqlite3.connect('forge.db')
 
     def set_quota(self, username, last_request_at):
-        db = self.__connect()
         with self.__lock:
-            db.execute('INSERT OR REPLACE INTO quota VALUES (?, ?)',
+            db = self.__connect()
+            db.execute('REPLACE INTO quota VALUES (?, ?)',
                        (username, last_request_at))
             db.commit()
             db.close()
