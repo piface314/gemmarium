@@ -1,0 +1,12 @@
+<GemHolder>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2 if self.highlight and self.state == 'down' else 0
+        Rectangle:
+            pos: 0, -10
+            size: self.size
+    Image:
+        source: 'res/base.png'
+        allow_stretch: True
+        size_hint: 1, 1
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}

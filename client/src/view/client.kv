@@ -1,5 +1,5 @@
 <Screen>:
-    on_leave: app.screen_history.append(self.name)
+    on_enter: app.screen_history.append(self.name)
     canvas.before:
         Color:
             rgba: (0, 0, 0, 1)

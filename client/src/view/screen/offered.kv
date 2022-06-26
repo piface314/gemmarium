@@ -1,0 +1,14 @@
+#:import Bar view.component.bar.Bar
+#:import ToggleList view.component.toggle_list.ToggleList
+
+<OfferedScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Bar:
+            id: header
+            title: "Oferecidas"
+            bgcolor: (.2, .2, .2, 1)
+            size_hint: None, None
+        ToggleList:
+            id: toggle_list
+            handle_toggle: root.handle_toggle

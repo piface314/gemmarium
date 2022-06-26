@@ -29,13 +29,13 @@ if __name__ == '__main__':
     Model.set_db_fp(argv[7])
     Model.create_db('res/create.sql')
 
-    profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
-    profile_ctrl = ProfileCtrl(profile_endp)
-    search_endp = SearchEndpoint(gallery_addr, search_addr, None)
-    search_ctrl = SearchCtrl(search_endp)
     collection_endp = CollectionEndpoint(forge_addr, forge_pkey, forge_vkey)
-    collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp)
+    profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
+    search_endp = SearchEndpoint(gallery_addr, search_addr, None)
     trade_endp = TradeEndpoint(forge_vkey)
+    profile_ctrl = ProfileCtrl(profile_endp, search_endp)
+    search_ctrl = SearchCtrl(search_endp)
+    collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp)
     trade_ctrl = TradeCtrl(collection_ctrl, trade_endp)
 
     profile_ctrl.load()
@@ -49,7 +49,6 @@ if __name__ == '__main__':
 
     Config.set('graphics', 'width', 378)
     Config.set('graphics', 'height', 672)
-    Config.set('graphics', 'resizable', 0)
     Config.set('kivy', 'default_font', [
         'res/regular.ttf',
         'res/bold.ttf',

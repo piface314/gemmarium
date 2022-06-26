@@ -12,6 +12,7 @@
             id: text_input
             hint_text: 'Nome de usuário...'
             multiline: False
+            padding_y: self.height/2-(self.line_height/2)*len(self._lines), 0
             size_hint: (1, None)
             on_text_validate: root.signup()
         Button:

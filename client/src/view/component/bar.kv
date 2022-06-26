@@ -1,18 +1,5 @@
-#:set h cm(1.5)
-
-<IconButton@Button>:
-    pad: 6
-    tx: None
-    size_hint: None, None
-    size: h-self.pad*2, h-self.pad*2
-    canvas:
-        Rectangle:
-            size: self.size[0] - self.pad*2, self.size[1] - self.pad*2 
-            pos: self.pos[0] + self.pad, self.pos[1] + self.pad
-            texture: self.tx
-
 <Bar>:
-    size: self.parent.size[0], h
+    size: self.parent.size[0], cm(1.5)
     canvas.before:
         Color:
             rgba: self.bgcolor

@@ -1,3 +1,16 @@
-<Wantedcreen>:
+#:import Bar view.component.bar.Bar
+#:import StrList view.component.str_list.StrList
+
+<WantedScreen>:
     BoxLayout:
         orientation: 'vertical'
+        Bar:
+            id: header
+            title: "Buscadas"
+            bgcolor: (.2, .2, .2, 1)
+            size_hint: None, None
+        StrList:
+            id: str_list
+            hint_text: 'Nome de gema...'
+            add: root.handle_add
+            delete: root.handle_del

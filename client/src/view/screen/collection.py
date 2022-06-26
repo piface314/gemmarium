@@ -4,18 +4,12 @@ from kivy.clock import mainthread
 from kivy.factory import Factory
 from kivy.lang import Builder
 from kivy.properties import ListProperty
-from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.screenmanager import Screen
 from model.gem import Gem
-from view.component.sprite import Sprite, gem_rects
+from view.component.holder import GemHolder
 import threading
 
 Builder.load_file('src/view/screen/collection.kv')
-
-
-class GemHolder(ButtonBehavior, RelativeLayout):
-    pass
 
 
 class CollectionScreen(Screen):
@@ -23,12 +17,13 @@ class CollectionScreen(Screen):
     gems = ListProperty([])
 
     def on_enter(self, *args):
+        super().on_enter(*args)
         app = App.get_running_app()
         bar = self.ids['header']
         bar.lt_btn = [app.get_back_button()]
         bar.rt_btn = [
-            (self.goto_wanted, app.button_icons['edit_wanted']),
-            (self.goto_offered, app.button_icons['edit_offered']),
+            (self.goto_wanted, app.get_texture('buttons-edit_wanted')),
+            (self.goto_offered, app.get_texture('buttons-edit_offered')),
         ]
         worker = threading.Thread(target=(self.load_gems))
         worker.start()
@@ -39,45 +34,34 @@ class CollectionScreen(Screen):
         self.gems = self.ctrl.list_gems()
 
     def goto_offered(self, *args):
-        print("goto_offered")
+        self.manager.current = 'offered'
 
     def goto_wanted(self, *args):
-        print("goto_wanted")
+        self.manager.current = 'wanted'
 
     def goto_gem(self, gem: Gem):
         popup = Factory.GemShow()
         popup.title = gem.name
-        popup.text = gem.desc
-        gem_sp = Sprite.from_bytes(
-            gem.sprite,
-            gem_rects,
-            f'{gem.id}.png'
-        )
-        gem_sp.animate = True
-        gem_sp.allow_stretch = True
-        gem_sp.size_hint = (0.5, 0.5)
-        gem_sp.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
-        holder = GemHolder()
-        holder.add_widget(gem_sp)
+        popup.text = self.gem_text(gem)
         layout = popup.ids['layout']
-        layout.add_widget(holder, 2)
+        layout.add_widget(GemHolder.from_gem(gem), 1)
         popup.open()
+    
+    def gem_text(self, gem: Gem):
+        lines = [
+            f'Obtida em: {gem.obtained_at.strftime("%Y/%m/%d %H:%M:%S")}',
+            f'Criada em: {gem.created_at.strftime("%Y/%m/%d %H:%M:%S")}',
+            f'Criada para: @{gem.created_for}',
+            f'Criada por: {gem.created_by}',
+            f'Descrição:\n{gem.desc}'
+        ]
+        return '\n'.join(lines)
 
     @mainthread
     def on_gems(self, _, gems: list[Gem]):
         layout = self.ids['gem_list']
         layout.clear_widgets()
         for gem in gems:
-            gem_sp = Sprite.from_bytes(
-                gem.sprite,
-                gem_rects,
-                f'{gem.id}.png'
-            )
-            gem_sp.animate = True
-            gem_sp.allow_stretch = True
-            gem_sp.size_hint = (0.5, 0.5)
-            gem_sp.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
-            holder = GemHolder()
-            holder.add_widget(gem_sp)
+            holder = GemHolder.from_gem(gem, True)
             holder.bind(on_release=lambda *_, g=gem: self.goto_gem(g))
             layout.add_widget(holder)

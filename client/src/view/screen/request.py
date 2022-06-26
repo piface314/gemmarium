@@ -9,6 +9,7 @@ from kivy.uix.screenmanager import Screen
 from model.gem import Gem
 from view.component.popup import Loading, Warning
 from view.component.sprite import Sprite, gem_rects
+from view.component.holder import GemHolder
 import threading
 
 Builder.load_file('src/view/screen/request.kv')
@@ -21,6 +22,7 @@ class RequestScreen(Screen):
     msg = StringProperty("...")
 
     def on_enter(self, *args):
+        super().on_enter(*args)
         app = App.get_running_app()
         bar = self.ids['header']
         bar.lt_btn = [app.get_back_button()]
@@ -86,10 +88,13 @@ class RequestScreen(Screen):
         )
         gem.animate = True
         gem.allow_stretch = True
-        gem.size_hint = (0.3, 0.3)
+        gem.size_hint = (0.5, 0.5)
         gem.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        holder = GemHolder(highlight=False)
+        holder.size_hint = (0.6, 0.6)
+        holder.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        holder.add_widget(gem)
         layout = self.ids['display']
         layout.clear_widgets()
-        layout.add_widget(Factory.GemBase())
-        layout.add_widget(gem)
+        layout.add_widget(holder)
             
