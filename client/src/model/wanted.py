@@ -11,7 +11,7 @@ class Wanted(Model):
         db = cls.connect()
         return Wanted({gem for gem, in db.execute('SELECT * FROM wanted')})
 
-    def __init__(self, gems: set[str]):
+    def __init__(self, gems):
         self.gems = gems
 
     def add(self, gem: str):

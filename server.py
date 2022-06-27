@@ -40,7 +40,7 @@ class Server:
         self.__known_hosts.add(addr)
 
     def get_key(self, addr):
-        return (self.__known_keys | self.__trusted_keys).get(addr, None)
+        return ({**self.__known_keys, **self.__trusted_keys}).get(addr, None)
 
     def run(self):
         try:

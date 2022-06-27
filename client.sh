@@ -18,7 +18,13 @@ else
 fi
 
 
-cd client \
-  && source .venv/bin/activate \
-  && python3 src/main.py "$vault_ip" "$vault_port" "$forge_ip" "$forge_port" \
+cd client
+if [[ ! -d .venv ]]; then
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+else
+  source .venv/bin/activate
+fi
+python3 src/main.py "$vault_ip" "$vault_port" "$forge_ip" "$forge_port" \
     "$search_ip" "$search_port" "$db_fp"

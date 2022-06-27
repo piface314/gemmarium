@@ -45,15 +45,18 @@ if __name__ == '__main__':
     trade_endp.set_keys(skey, pkey)
 
     collection_ctrl.load()
+    collection_ctrl.sync_gallery()
 
     threading.Thread(target=search_endp.listen, daemon=True).start()
 
+    Config.read('config.ini')
     Config.set('graphics', 'width', 378)
     Config.set('graphics', 'height', 672)
     Config.set('kivy', 'default_font', [
         'res/regular.ttf',
         'res/bold.ttf',
     ])
+    Config.write()
     ClientApp(
         collection_ctrl,
         profile_ctrl,

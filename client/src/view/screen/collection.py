@@ -50,7 +50,7 @@ class CollectionScreen(Screen):
         ]
         return '\n'.join(lines)
 
-    def on_gems(self, _, gems: list[Gem]):
+    def on_gems(self, _, gems):
         layout = self.ids['gem_list']
         layout.clear_widgets()
         for gem in gems:

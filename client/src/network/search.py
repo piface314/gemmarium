@@ -35,6 +35,7 @@ class SearchEndpoint:
                 if data[:10] != b'gemsearch?':
                     continue
                 pkey = PublicKey(data[10:])
+                print(self.__gallery)
                 reply = (self.__username,) + self.__gallery
                 reply = json.dumps(reply).encode('utf-8')
                 reply = Box(self.__private_key, pkey).encrypt(reply)
@@ -42,10 +43,11 @@ class SearchEndpoint:
                 s.sendto(self.__public_key.encode() + reply, addr)
     
     def local_search(self, wait=1):
-        results: list[SearchResult] = []
+        results = []
         msg = b'gemsearch?' + self.__public_key.encode()
         interfaces = socket.getaddrinfo(host=socket.gethostname(), port=None, family=socket.AF_INET)
         ips = {ip[-1][0] for ip in interfaces}
+        ips.add("")
         workers = [threading.Thread(target=self.__local_search_request, args=(ip, wait, msg, results))
             for ip in ips]
         for worker in workers:
@@ -70,6 +72,8 @@ class SearchEndpoint:
                 reply = Box(skey, pkey).decrypt(data[32:])
                 reply = json.loads(reply.decode('utf-8'))
                 peername, wanted, offered = reply
+                if peername == self.__username:
+                    continue
                 gl = GemList(wanted, offered)
                 res = SearchResult(peername, addr[0], addr[1], pkey, gl)
                 with self.__lock:

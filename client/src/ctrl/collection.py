@@ -38,7 +38,7 @@ class CollectionCtrl:
         return sorted(self.__wanted.gems)
 
     def sync_gallery(self):
-        offered = [gem.name for gem in self.__gems.values()]
+        offered = [gem.name for gem in self.__gems.values() if gem.is_public]
         gl = GemList(self.list_wanted(), offered)
         self.__search_endp.sync_gallery(gl)
 
