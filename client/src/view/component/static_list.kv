@@ -1,0 +1,31 @@
+#:set gpad sp(10)
+
+<LabelRow>:
+    text_size: root.width, None
+    size: self.texture_size
+    text: root.text
+    halign: 'left'
+    valign: 'middle'
+    font_size: 18
+    markup: True
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1 if self.index else 0
+        Rectangle:
+            size: self.width, 1
+            pos: self.x, self.y + self.height + gpad/2
+    
+
+<StaticList>:
+    do_scroll_x: False
+    do_scroll_y: True
+    GridLayout:
+        id: static_list
+        size_hint_y: None
+        width: root.width
+        height: self.minimum_height
+        cols: 1
+        col_default_width: root.width - gpad*2
+        row_default_height: root.row_height
+        spacing: gpad
+        padding: gpad

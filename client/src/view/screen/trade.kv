@@ -1,3 +1,46 @@
+#:import Bar view.component.bar.Bar
+#:import StaticList view.component.static_list.StaticList
+#:import StrList view.component.str_list.StrList
+#:import ToggleList view.component.toggle_list.ToggleList
+
 <TradeScreen>:
     BoxLayout:
         orientation: 'vertical'
+        Bar:
+            id: header
+            title: "Troca"
+            offset: 0.8
+            bgcolor: (.2, .2, .2, 1)
+            size_hint: None, None
+        GridLayout:
+            cols: 2
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    points: self.x+self.width/2, self.y, self.x+self.width/2, self.y+self.height
+                    width: 1
+                Line:
+                    points: self.x, self.y+self.height/2, self.x+self.width, self.y+self.height/2
+                    width: 1
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Buscadas'
+                    size_hint: 1, None
+                    height: self.texture_size[1] + sp(10)
+                StaticList:
+                    id: peer_wanted
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Ofertadas'
+                    size_hint: 1, None
+                    height: self.texture_size[1] + sp(10)
+                StaticList:
+                    id: peer_offered
+            ToggleList:
+                id: self_offered
+            StrList:
+                id: self_wanted
+                hint_text: "Nome de gema..."

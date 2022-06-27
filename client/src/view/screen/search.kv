@@ -1,3 +1,146 @@
+#:import Bar view.component.bar.Bar
+#:import Trade model.trade.Trade
+#:import StaticList view.component.static_list.StaticList
+#:set rowh sp(48)
+
+<SearchPopup>:
+    size_hint: 0.9, 0.75
+    auto_dismiss: True
+    title_align: 'center'
+    title: f'@{self.data.peername}'
+    BoxLayout:
+        id: layout
+        orientation: 'vertical'
+        padding: sp(5)
+        spacing: sp(10)
+        Label:
+            markup: True
+            text_size: self.size
+            size_hint: None, None
+            width: self.parent.width - self.parent.padding[0]*2
+            height: 48
+            halign: 'left'
+            valign: 'middle'
+            text: f'[color=cccccc]Endereço:[/color] {root.data.ip}:{root.data.port}'
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            GridLayout:
+                id: static_list
+                size_hint_y: None
+                width: root.width
+                height: self.minimum_height
+                cols: 1
+                col_default_width: self.width
+                row_default_height: 32
+                spacing: sp(16)
+                Label:
+                    markup: True
+                    text_size: self.parent.width, None
+                    size: self.texture_size
+                    size_hint: None, None
+                    halign: 'left'
+                    valign: 'middle'
+                    text: f'[color=cccccc]Gemas oferecidas:[/color]\n{root.data.gems.offered}'
+                Label:
+                    markup: True
+                    text_size: self.parent.width, None
+                    size: self.texture_size
+                    size_hint: None, None
+                    halign: 'left'
+                    valign: 'middle'
+                    text: f'[color=cccccc]Gemas buscadas:[/color]\n{root.data.gems.wanted}'
+        IconButton:
+            size_hint: None, None
+            width: self.parent.width - self.parent.padding[0]*2
+            height: 48
+            padding: sp(4), sp(4)
+            icon: app.get_texture('buttons-trade')
+            text: 'Propor troca'
+            font_size: 20
+            on_release:
+                root.dismiss()
+                app.current_trade = Trade.from_search_result(root.data)
+                root.manager.current = 'trade'
+        
+
 <SearchScreen>:
     BoxLayout:
         orientation: 'vertical'
+        Bar:
+            id: header
+            title: "Buscar"
+            bgcolor: (.2, .2, .2, 1)
+            size_hint: None, None
+        BoxLayout:
+            orientation: 'vertical'
+            padding: sp(10)
+            spacing: sp(10)
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: sp(5)
+                size_hint: None, None
+                width: self.parent.width - self.parent.padding[0]*2
+                height: rowh
+                TextInput:
+                    id: text_input
+                    hint_text: 'Busca...'
+                    multiline: False
+                    padding: 8, self.height/2-(self.line_height/2), 0, 0
+                IconButton:
+                    icon: root.search_icon
+                    size_hint: None, None
+                    size: self.parent.height, self.parent.height
+                    padding: sp(4), sp(4)
+                    on_release: root.search(text_input.text)
+                IconButton:
+                    icon: root.gsearch_icon
+                    size_hint: None, None
+                    size: self.parent.height, self.parent.height
+                    padding: sp(4), sp(4)
+                    on_release: root.global_search()
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: sp(5)
+                size_hint: None, None
+                width: self.parent.width - self.parent.padding[0]*2
+                height: rowh//2
+                IconButton:
+                    icon: root.check_icon
+                    icon_color: 1, 1, 1, int(root.query_type)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint: None, None
+                    size: self.parent.height, self.parent.height
+                    padding: sp(4), sp(4)
+                    on_release: root.query_type = True
+                Label:
+                    text: 'Oferecidas'
+                    halign: 'left'
+                    valign: 'middle'
+                    text_size: self.size
+                    font_size: 16
+                IconButton:
+                    icon: root.check_icon
+                    icon_color: 1, 1, 1, int(not root.query_type)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    size_hint: None, None
+                    size: self.parent.height, self.parent.height
+                    padding: sp(4), sp(4)
+                    on_release: root.query_type = False
+                Label:
+                    text: 'Buscadas'
+                    halign: 'left'
+                    valign: 'middle'
+                    text_size: self.size
+                    font_size: 16
+            StaticList:
+                id: results
+                handle: root.goto_result
+                padding: sp(16)
+                canvas:
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Line:
+                        width: 2
+                        rounded_rectangle: self.x, self.y, self.width, self.height, 4 
+

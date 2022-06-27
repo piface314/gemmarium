@@ -19,7 +19,7 @@
         icon: root.del_icon
         size_hint: None, None
         size: self.parent.size[1], self.parent.size[1]
-        padding: sp(5), sp(5)
+        padding: sp(4), sp(4)
         on_release: root.delete(root.index)
     
 
@@ -54,10 +54,10 @@
             id: text_input
             hint_text: root.hint_text
             multiline: False
-            padding_y: self.height/2-(self.line_height/2)*len(self._lines), 0
+            padding: 8, self.height/2-(self.line_height/2)*len(self._lines), 0, 0
         IconButton:
             icon: root.add_icon
             size_hint: None, None
-            size: self.parent.size[1]-sp(10), self.parent.size[1]-sp(10)
-            padding: sp(5), sp(5)
+            size: self.parent.height-sp(10), self.parent.height-sp(10)
+            padding: sp(4), sp(4)
             on_release: root.handle_add(text_input.text)

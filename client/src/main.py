@@ -13,8 +13,7 @@ from network.trade import TradeEndpoint
 from sys import argv
 from view.client import ClientApp
 import keys
-
-
+import threading
 
 if __name__ == '__main__':
     vault_addr = (argv[1], int(argv[2]))
@@ -31,7 +30,7 @@ if __name__ == '__main__':
 
     collection_endp = CollectionEndpoint(forge_addr, forge_pkey, forge_vkey)
     profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
-    search_endp = SearchEndpoint(gallery_addr, search_addr, None)
+    search_endp = SearchEndpoint(gallery_addr, search_addr[1], None)
     trade_endp = TradeEndpoint(forge_vkey)
     profile_ctrl = ProfileCtrl(profile_endp, search_endp)
     search_ctrl = SearchCtrl(search_endp)
@@ -46,6 +45,8 @@ if __name__ == '__main__':
     trade_endp.set_keys(skey, pkey)
 
     collection_ctrl.load()
+
+    threading.Thread(target=search_endp.listen, daemon=True).start()
 
     Config.set('graphics', 'width', 378)
     Config.set('graphics', 'height', 672)

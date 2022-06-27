@@ -1,13 +1,11 @@
 from ctrl.collection import CollectionCtrl
 from kivy.app import App
-from kivy.clock import mainthread
 from kivy.factory import Factory
 from kivy.lang import Builder
 from kivy.properties import ListProperty
 from kivy.uix.screenmanager import Screen
 from model.gem import Gem
 from view.component.holder import GemHolder
-import threading
 
 Builder.load_file('src/view/screen/collection.kv')
 
@@ -25,11 +23,6 @@ class CollectionScreen(Screen):
             (self.goto_wanted, app.get_texture('buttons-edit_wanted')),
             (self.goto_offered, app.get_texture('buttons-edit_offered')),
         ]
-        worker = threading.Thread(target=(self.load_gems))
-        worker.start()
-
-    def load_gems(self):
-        app = App.get_running_app()
         self.ctrl: CollectionCtrl = app.collection_ctrl
         self.gems = self.ctrl.list_gems()
 
@@ -57,7 +50,6 @@ class CollectionScreen(Screen):
         ]
         return '\n'.join(lines)
 
-    @mainthread
     def on_gems(self, _, gems: list[Gem]):
         layout = self.ids['gem_list']
         layout.clear_widgets()

@@ -3,13 +3,14 @@ from kivy.app import App
 from kivy.core.image import Image, TextureRegion
 from kivy.uix.screenmanager import ScreenManager, CardTransition, FallOutTransition
 from view.screen import (
-    SignupScreen,
+    CollectionScreen,
     MenuScreen,
     OfferedScreen,
     RequestScreen,
-    TradeListScreen,
-    CollectionScreen,
     SearchScreen,
+    SignupScreen,
+    TradeListScreen,
+    TradeScreen,
     WantedScreen
 )
 
@@ -33,6 +34,7 @@ class ClientApp(App):
         self.icon = 'res/icon.png'
         self.title = 'Gemmarium'
         self.textures = {}
+        self.current_trade = None
 
         sm = ScreenManager(transition=CardTransition())
         if not self.profile_ctrl.is_logged_in():
@@ -44,10 +46,13 @@ class ClientApp(App):
         sm.add_widget(RequestScreen(name='request'))
         sm.add_widget(SearchScreen(name='search'))
         sm.add_widget(TradeListScreen(name='trade_list'))
+        sm.add_widget(TradeScreen(name='trade'))
         return sm
     
     def on_start(self):
         self.load_textures('buttons', [
+            ('search', 0, 32, 16, 16),
+            ('gsearch', 16, 32, 16, 16),
             ('back', 0, 16, 16, 16),
             ('edit_offered', 16, 16, 16, 16),
             ('edit_wanted', 32, 16, 16, 16),

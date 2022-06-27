@@ -41,6 +41,7 @@ class ForgeCtrl:
         gem_data = self.gems[gem_id]
         gem = {
             'id': self.get_uuid(),
+            'tag': gem_id,
             'name': gem_data['name'],
             'desc': gem_data['desc'],
             'sprite': self.load_sprite(gem_id),

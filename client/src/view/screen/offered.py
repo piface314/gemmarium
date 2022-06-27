@@ -41,7 +41,7 @@ class OfferedScreen(Screen):
     def gem_label(self, gem: Gem):
         at = gem.obtained_at.strftime("%Y/%m/%d")
         metadata = f'{at} @{gem.created_for}'
-        return f'{gem.name}\n[size=12][color=#dddddd]{metadata}[/color][/size]'
+        return f'{gem.name}\n[size=12][color=cccccc]{metadata}[/color][/size]'
 
     def save(self):
         app = App.get_running_app()

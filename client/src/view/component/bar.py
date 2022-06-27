@@ -18,6 +18,7 @@ class Bar(Widget):
     title = StringProperty("")
     bgcolor = ColorProperty()
     padding = NumericProperty(6)
+    offset = NumericProperty(1)
 
     def on_lt_btn(self, _, buttons):
         layout = self.ids['lt_stack']
