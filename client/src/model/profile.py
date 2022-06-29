@@ -16,16 +16,17 @@ class Profile(Model):
         if data is None:
             skey = PrivateKey.generate()
             pkey = skey.public_key
-            p = Profile(None, pkey, skey, None)
+            p = Profile(None, None, pkey, skey, None)
             p.save()
             return p
         else:
-            username, pkey, skey, last_sync = data
+            id, username, pkey, skey, last_sync = data
             last_sync = None if last_sync is None else datetime.fromisoformat(last_sync)
-            return Profile(username, PublicKey(pkey), PrivateKey(skey), last_sync)
+            return Profile(id, username, PublicKey(pkey), PrivateKey(skey), last_sync)
 
 
-    def __init__(self, username: str, pkey: PublicKey, skey: PrivateKey, last_sync: datetime):
+    def __init__(self, id: str, username: str, pkey: PublicKey, skey: PrivateKey, last_sync: datetime):
+        self.id = id
         self.username = username
         self.public_key = pkey
         self.private_key = skey
@@ -33,6 +34,7 @@ class Profile(Model):
 
     def save(self):
         data = (
+            self.id,
             self.username,
             self.public_key._public_key,
             self.private_key._private_key,
@@ -41,6 +43,6 @@ class Profile(Model):
         db = self.connect()
         with self.__lock:
             db.execute('DELETE FROM `profile`')
-            db.execute('INSERT INTO `profile` VALUES (?, ?, ?, ?)', data)
+            db.execute('INSERT INTO `profile` VALUES (?, ?, ?, ?, ?)', data)
             db.commit()
         db.close()

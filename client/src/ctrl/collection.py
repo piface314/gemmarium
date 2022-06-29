@@ -58,8 +58,9 @@ class CollectionCtrl:
         gem.save()
 
     def request_gem(self):
+        uid = self.__profile_ctrl.get_id()
         username = self.__profile_ctrl.get_username()
-        gem_raw = self.__collection_endp.request_gem(username)
+        gem_raw = self.__collection_endp.request_gem(uid, username)
         gem = self.new_gem(gem_raw)
         self.add_gem(gem)
         return gem

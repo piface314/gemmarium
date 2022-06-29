@@ -13,24 +13,28 @@ class ProfileCtrl:
     
     def load(self):
         self.__profile = Profile.load()
-        self.__search_endp.set_username(self.get_username())
+        self.__search_endp.set_identity(self.get_id(), self.get_username())
     
     def get_keys(self):
         p = self.__profile
         return p.private_key, p.public_key
+    
+    def get_id(self):
+        return self.__profile.id
     
     def get_username(self):
         return self.__profile.username
 
     def signup(self, username: str):
         try:
-            self.__endpoint.signup(username, self.__profile.public_key)
+            uid = self.__endpoint.signup(username, self.__profile.public_key)
+            self.__profile.id = uid
             self.__profile.username = username
-            self.__search_endp.set_username(username)
+            self.__search_endp.set_identity(uid, username)
             self.__profile.save()
         except Exception as e:
             raise e
 
     def is_logged_in(self):
-        return self.__profile.username is not None
+        return self.__profile.id is not None
 

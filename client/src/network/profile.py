@@ -16,9 +16,9 @@ class ProfileEndpoint(Endpoint):
         vault_pkey = self.__vault_key
         with socket.socket() as s:
             s.connect(self.__vault_addr)
-            key = self.get_pkey().encode(Base64Encoder).decode()
-            msg = self.enc_msg(vault_pkey, 'signup', username=username, key=key)
+            msg = self.enc_msg(vault_pkey, 'signup', username=username)
             self.send_key(s, vault_pkey)
+            self.send_size(s, vault_pkey, msg)
             s.sendall(msg)
             data = s.recv(1024)
         op, args = self.dec_msg(vault_pkey, data)
@@ -30,4 +30,4 @@ class ProfileEndpoint(Endpoint):
                 raise InvalidUsernameError()
             else:
                 raise UnknownError()
-            
+        return args['id']

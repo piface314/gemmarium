@@ -19,7 +19,8 @@ class SearchEndpoint:
         self.__username = ""
         self.__lock = threading.Lock()
 
-    def set_username(self, username: str):
+    def set_identity(self, id: str, username: str):
+        self.__id = id
         self.__username = username
 
     def set_keys(self, skey: PrivateKey, pkey: PublicKey):
