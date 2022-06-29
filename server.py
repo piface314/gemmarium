@@ -16,13 +16,9 @@ class Server:
     def __init__(self, private_key, public_key):
         self.__private_key = private_key
         self.__public_key = public_key
-        self.__buffer_size = 1024
         self.__trusted_keys = {}
         self.__known_keys = {}
         self.__known_hosts = set()
-
-    def set_buffer_size(self, size):
-        self.__buffer_size = size
 
     def __set_key(self, d, addr, pkey, encoder):
         if encoder is None:
@@ -85,6 +81,12 @@ class Server:
         box = SealedBox(self.__private_key)
         key = box.decrypt(conn.recv(80))
         self.learn_key(addr, key, RawEncoder)
+    
+    def recv_size(self, conn, addr):
+        pkey = self.get_key(addr)
+        box = Box(self.__private_key, pkey)
+        size = box.decrypt(conn.recv(44))
+        return int.from_bytes(size, 'little')
 
     def handle(self, conn, addr, keep):
         print(f"Thread@{addr}: connected")
@@ -94,7 +96,8 @@ class Server:
                     try:
                         if not keep:
                             self.recv_key(conn, addr)
-                        payload = conn.recv(self.__buffer_size)
+                        size = self.recv_size(conn, addr)
+                        payload = conn.recv(size)
                         op, args = self.dec_msg(addr, payload)
                         handler = self.__getattribute__("handle_" + op)
                         handler(conn, addr, **args)

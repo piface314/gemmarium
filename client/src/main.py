@@ -19,7 +19,9 @@ if __name__ == '__main__':
     vault_addr = (argv[1], int(argv[2]))
     forge_addr = (argv[3], int(argv[4]))
     gallery_addr = ("", 0)
-    search_addr = (argv[5], int(argv[6]))
+    search_port = int(argv[5])
+    trade_port = int(argv[6])
+    offset = int(argv[7])
     
     vault_pkey = PublicKey(keys.vault_pkey)
     forge_pkey = PublicKey(keys.forge_pkey)
@@ -28,14 +30,16 @@ if __name__ == '__main__':
     Model.set_db_fp(argv[7])
     Model.create_db('res/create.sql')
 
-    collection_endp = CollectionEndpoint(forge_addr, forge_pkey, forge_vkey)
+    SearchEndpoint.OFFSET = offset
+
+    collection_endp = CollectionEndpoint(forge_addr, forge_pkey)
     profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
-    search_endp = SearchEndpoint(gallery_addr, search_addr[1], None)
-    trade_endp = TradeEndpoint(forge_vkey)
+    search_endp = SearchEndpoint(gallery_addr, search_port, None)
+    trade_endp = TradeEndpoint(forge_addr, forge_pkey, trade_port)
     profile_ctrl = ProfileCtrl(profile_endp, search_endp)
     search_ctrl = SearchCtrl(search_endp)
-    collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp)
-    trade_ctrl = TradeCtrl(collection_ctrl, trade_endp)
+    collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp, forge_vkey)
+    trade_ctrl = TradeCtrl(collection_ctrl, trade_endp, forge_vkey)
 
     profile_ctrl.load()
     skey, pkey = profile_ctrl.get_keys()
@@ -48,6 +52,7 @@ if __name__ == '__main__':
     collection_ctrl.sync_gallery()
 
     threading.Thread(target=search_endp.listen, daemon=True).start()
+    threading.Thread(target=trade_endp.listen, daemon=True).start()
 
     Config.read('config.ini')
     Config.set('graphics', 'width', 378)

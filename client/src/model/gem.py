@@ -35,7 +35,7 @@ class Gem(Model):
                  created_at: datetime,
                  obtained_at: datetime,
                  is_public: bool,
-                 payload: bytes
+                 payload: str
                  ):
         self.id = gem_id
         self.name = name
