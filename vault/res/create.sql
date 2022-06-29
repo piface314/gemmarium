@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS user (
-  username TEXT NOT NULL,
+  id TEXT NOT NULL,
+  username TEXT NOT NULL UNIQUE,
   public_key BLOB NOT NULL,
-  PRIMARY KEY (username)
+  PRIMARY KEY (id)
 );

@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 if [[ -n "$1" ]]; then
-  forge_ip=$1
-  forge_port=$2
-  vault_ip=$3
-  vault_port=$4
-  vault_client_port=$5
-  gem_time=$6
+  forge_port=$1
+  vault_ip=$2
+  vault_port=$3
+  vault_client_port=$4
+  gem_time=$5
 else
-  forge_ip=""
   forge_port="7514"
   vault_ip="127.0.0.1"
   vault_port="7513"
@@ -23,5 +21,5 @@ if [[ ! -d .venv ]]; then
 else
   source .venv/bin/activate
 fi
-python3 src/main.py "$forge_ip" "$forge_port" "$vault_ip" \
+python3 src/main.py "$forge_port" "$vault_ip" \
     "$vault_port" "$vault_client_port" "$gem_time"

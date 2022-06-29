@@ -1,44 +1,70 @@
-from nacl.public import PublicKey, Box, SealedBox
+from nacl.public import PrivateKey, PublicKey, Box, SealedBox
 from nacl.encoding import Base64Encoder, RawEncoder
 from nacl.exceptions import CryptoError
 import json
 import socket
 import threading
+import traceback
 
 
-class UnauthorizedError(Exception):
+class AuthError(Exception):
+
+    pass
+
+class PublicKeyError(Exception):
 
     pass
 
 
 class Server:
 
-    def __init__(self, private_key, public_key):
+    def __init__(self, private_key: PrivateKey, public_key: PublicKey):
         self.__private_key = private_key
         self.__public_key = public_key
-        self.__trusted_keys = {}
-        self.__known_keys = {}
-        self.__known_hosts = set()
+        self.__trusted_hosts = {}
 
-    def __set_key(self, d, addr, pkey, encoder):
-        if encoder is None:
-            d[addr] = pkey
-        else:
-            d[addr] = PublicKey(pkey, encoder)
-
-    def trust_key(self, addr, pkey, encoder=None):
-        self.__set_key(self.__trusted_keys, addr, pkey, encoder)
-
-    def learn_key(self, addr, pkey, encoder=None):
-        self.__set_key(self.__known_keys, addr, pkey, encoder)
-
-    def learn_host(self, addr):
-        self.__known_hosts.add(addr)
+    def trust_host(self, addr, pkey):
+        self.__trusted_hosts[addr] = pkey
 
     def get_key(self, addr):
-        return ({**self.__known_keys, **self.__trusted_keys}).get(addr, None)
+        return self.__trusted_hosts.get(addr, None)
 
-    def run(self):
+    def close(self):
+        pass
+    
+    def enc_msg(self, pkey: PublicKey, op: str, **args):
+        payload = json.dumps([op, args]).encode('utf-8')
+        box = Box(self.__private_key, pkey)
+        return box.encrypt(payload)
+
+    def dec_msg(self, pkey: PublicKey, payload: bytes):
+        box = Box(self.__private_key, pkey)
+        return json.loads(box.decrypt(payload))
+
+    def recv_key(self, conn, addr, keep: bool):
+        if keep:
+            return self.get_key(addr)
+        try:
+            box = SealedBox(self.__private_key)
+            payload = box.decrypt(conn.recv(80))
+            return PublicKey(payload)
+        except:
+            raise PublicKeyError()
+    
+    def recv_size(self, conn, pkey: PublicKey):
+        box = Box(self.__private_key, pkey)
+        size = box.decrypt(conn.recv(44))
+        return int.from_bytes(size, 'little')
+    
+    def send_size(self, conn, pkey: PublicKey, msg: bytes):
+        size = len(msg).to_bytes(4, 'little')
+        box = Box(self.__private_key, pkey)
+        conn.sendall(box.encrypt(size))
+    
+    def send(self, conn, pkey: PublicKey, op: str, **args):
+        conn.sendall(self.enc_msg(pkey, op, **args))
+    
+    def listen(self):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.bind(self.addr)
@@ -46,69 +72,42 @@ class Server:
                 while True:
                     print("Listening...")
                     conn, addr = s.accept()
-                    keep = addr in self.__known_hosts
+                    # conn.settimeout(5)
+                    keep = addr in self.__trusted_hosts
                     worker = threading.Thread(
                         target=self.handle,
                         args=(conn, addr, keep)
                     )
                     worker.start()
         finally:
+            s.close()
             self.close()
-
-    def close(self):
-        pass
-    
-    def enc_msg(self, addr, op, **args):
-        pkey = self.get_key(addr)
-        if pkey:
-            payload = json.dumps([op, args]).encode('utf-8')
-            box = Box(self.__private_key, pkey)
-            return box.encrypt(payload)
-        else:
-            return json.dumps(["error", {"code": "UnknownError"}]).encode('utf-8')
-
-    def dec_msg(self, addr, payload):
-        pkey = self.get_key(addr)
-        skey = self.__private_key
-        box = SealedBox(skey) if pkey is None else Box(skey, pkey)
-        try:
-            msg = json.loads(box.decrypt(payload))
-        except CryptoError:
-            raise UnauthorizedError()
-        return msg
-
-    def recv_key(self, conn, addr):
-        box = SealedBox(self.__private_key)
-        key = box.decrypt(conn.recv(80))
-        self.learn_key(addr, key, RawEncoder)
-    
-    def recv_size(self, conn, addr):
-        pkey = self.get_key(addr)
-        box = Box(self.__private_key, pkey)
-        size = box.decrypt(conn.recv(44))
-        return int.from_bytes(size, 'little')
 
     def handle(self, conn, addr, keep):
         print(f"Thread@{addr}: connected")
         try:
-            with conn:
-                while True:
-                    try:
-                        if not keep:
-                            self.recv_key(conn, addr)
-                        size = self.recv_size(conn, addr)
-                        payload = conn.recv(size)
-                        op, args = self.dec_msg(addr, payload)
-                        handler = self.__getattribute__("handle_" + op)
-                        handler(conn, addr, **args)
-                    except AttributeError:
-                        conn.sendall(self.enc_msg(addr, "error", code="UnknownOperation"))
-                    except UnauthorizedError:
-                        conn.sendall(self.enc_msg(addr, "error", code="Unauthorized"))
-                    except Exception as e:
-                        print(e)
-                        conn.sendall(self.enc_msg(addr, "error", code="UnknownError"))
+            try:
+                pkey = self.recv_key(conn, addr, keep)
+                run = True
+                while run:
                     if not keep:
-                        break
+                        run = False
+                    size = self.recv_size(conn, pkey)
+                    payload = conn.recv(size)
+                    op, args = self.dec_msg(pkey, payload)
+                    handler = self.__getattribute__("handle_" + op)
+                    handler(conn, addr, pkey, **args)
+            except AttributeError:
+                conn.sendall(self.enc_msg(pkey, "error", code="UnknownOperation"))
+            except AuthError:
+                conn.sendall(self.enc_msg(pkey, "error", code="AuthError"))
+            except PublicKeyError:
+                msg = json.dumps(["error", {"code": "BadPublicKey"}]).encode('utf-8')
+                conn.sendall(msg)
+            except Exception as e:
+                traceback.print_exception(type(e), e, e.__traceback__)
+                conn.sendall(self.enc_msg(pkey, "error", code="UnknownError"))
         except BrokenPipeError:
             print(f"Thread@{addr}: disconnected")
+        finally:
+            conn.close()

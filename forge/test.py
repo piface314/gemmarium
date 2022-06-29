@@ -11,14 +11,23 @@ pkey = PublicKey(b'\xc1\x8a\xe8D1\xb9Q:\xcf\x88o\x1b\x8f\xea\xad\nv4\xce\xa2\xf0
 forge_pkey = PublicKey(src.keys.forge_pkey)
 forge_vkey = VerifyKey(src.keys.forge_vkey)
 
-def request(username):
+def request(id):
     with socket.socket() as s:
         s.connect(("127.0.0.1", 7514))
-        payload = json.dumps(['request', dict(username=username)]).encode('utf-8')
+        payload = json.dumps(['request', dict(id=id)]).encode('utf-8')
         box = Box(skey, forge_pkey)
         msg = box.encrypt(payload)
         s.sendall(SealedBox(forge_pkey).encrypt(pkey.encode()))
+        s.sendall(box.encrypt(len(msg).to_bytes(4, 'little')))
         s.sendall(msg)
+        data = s.recv(1024)
+        op, args = json.loads(box.decrypt(data))
+        if op != 'auth':
+            print(f"!!! {op}, {args}")
+            return
+        print(f"It's a secret: {args['secret']}")
+        msg = json.dumps([op, {'secret': args['secret']}]).encode('utf-8')
+        s.sendall(box.encrypt(msg))
         data = s.recv(4096)
         print(f'len(data): {len(data)}')
         op, args = json.loads(box.decrypt(data))
@@ -32,4 +41,4 @@ def request(username):
         else:
             print(args)
 
-request('tuershen')
+request('322d85b6-2188-4494-aba1-be9519c5f729')

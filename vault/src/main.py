@@ -1,19 +1,20 @@
 from auth_ctrl import AuthCtrl
+from auth_endpoint import AuthEndpoint
 from database import Database
 from nacl.public import PrivateKey, PublicKey
 from sys import argv
 import keys
 
 if __name__ == '__main__':
+    vault_port, forge_ip, forge_port = argv[1:4]
     db = Database()
-    addr = (argv[1], int(argv[2]))
-    forge_addr = (argv[3], int(argv[4]))
-    auth_ctrl = AuthCtrl(
-        addr=addr,
+    auth_ctrl = AuthCtrl(db)
+    auth_endp = AuthEndpoint(
+        port=int(vault_port),
         private_key=PrivateKey(keys.vault_skey),
         public_key=PublicKey(keys.vault_pkey),
-        db=db
+        ctrl=auth_ctrl
     )
-    auth_ctrl.trust_key(forge_addr, PublicKey(keys.forge_pkey))
-    auth_ctrl.learn_host(forge_addr)
-    auth_ctrl.run()
+    forge_addr = (forge_ip, int(forge_port))
+    auth_endp.trust_host(forge_addr, PublicKey(keys.forge_pkey))
+    auth_endp.listen()

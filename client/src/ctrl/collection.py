@@ -1,5 +1,5 @@
 from ctrl.profile import ProfileCtrl
-from exceptions import QuotaError, InvalidGemError
+from exceptions import InvalidGemError
 from model.gem import Gem
 from model.misc import GemList
 from model.wanted import Wanted
@@ -9,7 +9,7 @@ from nacl.encoding import Base64Encoder
 from nacl.exceptions import BadSignatureError
 from nacl.signing import VerifyKey
 import json
-import datetime
+from datetime import datetime
 
 class CollectionCtrl:
 

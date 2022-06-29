@@ -16,12 +16,13 @@ import keys
 import threading
 
 if __name__ == '__main__':
-    vault_addr = (argv[1], int(argv[2]))
-    forge_addr = (argv[3], int(argv[4]))
+    search_port, trade_port, vault_ip, vault_port, forge_ip, forge_port, db_fp, offset = argv[1:9]
+    vault_addr = (vault_ip, int(vault_port))
+    forge_addr = (forge_ip, int(forge_port))
     gallery_addr = ("", 0)
-    search_port = int(argv[5])
-    trade_port = int(argv[6])
-    offset = int(argv[7])
+    search_port = int(search_port)
+    trade_port = int(trade_port)
+    offset = int(offset)
     
     vault_pkey = PublicKey(keys.vault_pkey)
     forge_pkey = PublicKey(keys.forge_pkey)
@@ -31,6 +32,7 @@ if __name__ == '__main__':
     Model.create_db('res/create.sql')
 
     SearchEndpoint.OFFSET = offset
+    TradeEndpoint.OFFSET = offset
 
     collection_endp = CollectionEndpoint(forge_addr, forge_pkey)
     profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     profile_ctrl = ProfileCtrl(profile_endp, search_endp)
     search_ctrl = SearchCtrl(search_endp)
     collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp, forge_vkey)
-    trade_ctrl = TradeCtrl(collection_ctrl, trade_endp, forge_vkey)
+    trade_ctrl = TradeCtrl(collection_ctrl, trade_endp)
 
     profile_ctrl.load()
     skey, pkey = profile_ctrl.get_keys()
