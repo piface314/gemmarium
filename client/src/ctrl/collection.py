@@ -13,10 +13,9 @@ from datetime import datetime
 
 class CollectionCtrl:
 
-    def __init__(self, profile_ctrl: ProfileCtrl,
+    def __init__(self,
                  col_endp: CollectionEndpoint, search_endp: SearchEndpoint,
                  forge_vkey: VerifyKey):
-        self.__profile_ctrl = profile_ctrl
         self.__collection_endp = col_endp
         self.__search_endp = search_endp
         self.__gems = {}
@@ -26,6 +25,10 @@ class CollectionCtrl:
     def load(self):
         self.__gems = Gem.load_all()
         self.__wanted = Wanted.load()
+    
+    def set_identity(self, id, username):
+        self.__id = id
+        self.__username = username
 
     def list_gems(self):
         return sorted(self.__gems.values(),
@@ -58,8 +61,8 @@ class CollectionCtrl:
         gem.save()
 
     def request_gem(self):
-        uid = self.__profile_ctrl.get_id()
-        username = self.__profile_ctrl.get_username()
+        uid = self.__id
+        username = self.__username
         gem_raw = self.__collection_endp.request_gem(uid, username)
         gem = self.new_gem(gem_raw)
         self.add_gem(gem)

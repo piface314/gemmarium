@@ -5,22 +5,25 @@ from network.search import SearchEndpoint
 
 class ProfileCtrl:
 
-    def __init__(self, endpoint: ProfileEndpoint, search_endp: SearchEndpoint):
+    def __init__(self, endpoint: ProfileEndpoint):
         self.__endpoint = endpoint
         self.__profile: Profile = None
-        self.__search_endp = search_endp
-        self.load()
+        self.__observers = []
     
     def load(self):
         self.__profile = Profile.load()
-        self.__search_endp.set_identity(self.get_id(), self.get_username())
+        self.__emit()
     
     def get_keys(self):
         p = self.__profile
         return p.private_key, p.public_key
     
-    def get_id(self):
-        return self.__profile.id
+    def observe(self, cb):
+        self.__observers.append(cb)
+    
+    def __emit(self):
+        for cb in self.__observers:
+            cb(self.___profile)
     
     def get_username(self):
         return self.__profile.username
@@ -30,8 +33,8 @@ class ProfileCtrl:
             uid = self.__endpoint.signup(username, self.__profile.public_key)
             self.__profile.id = uid
             self.__profile.username = username
-            self.__search_endp.set_identity(uid, username)
             self.__profile.save()
+            self.__emit()
         except Exception as e:
             raise e
 

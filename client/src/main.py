@@ -37,8 +37,12 @@ if __name__ == '__main__':
     trade_endp = TradeEndpoint(trade_port, forge_addr, forge_pkey)
     profile_ctrl = ProfileCtrl(profile_endp, search_endp)
     search_ctrl = SearchCtrl(search_endp)
-    collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp, forge_vkey)
+    collection_ctrl = CollectionCtrl(collection_endp, search_endp, forge_vkey)
     trade_ctrl = TradeCtrl(collection_ctrl, trade_endp)
+
+    profile_ctrl.observe(lambda p: collection_ctrl.set_identity(p.id, p.username))
+    profile_ctrl.observe(lambda p: search_endp.set_identity(p.id, p.username))
+    profile_ctrl.observe(lambda p: trade_endp.set_identity(p.id, p.username))
 
     profile_ctrl.load()
     skey, pkey = profile_ctrl.get_keys()
