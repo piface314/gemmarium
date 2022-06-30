@@ -29,7 +29,7 @@ class CollectionCtrl:
 
     def list_gems(self):
         return sorted(self.__gems.values(),
-            key=lambda g: (g.name, g.obtained_at))
+            key=lambda g: (g.obtained_at, g.name))
 
     def set_visibility(self, gem: Gem, is_public: bool):
         gem.is_public = is_public

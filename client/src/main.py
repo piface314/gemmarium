@@ -31,13 +31,10 @@ if __name__ == '__main__':
     Model.set_db_fp(argv[7])
     Model.create_db('res/create.sql')
 
-    SearchEndpoint.OFFSET = offset
-    TradeEndpoint.OFFSET = offset
-
     collection_endp = CollectionEndpoint(forge_addr, forge_pkey)
     profile_endp = ProfileEndpoint(vault_addr, vault_pkey)
-    search_endp = SearchEndpoint(gallery_addr, search_port, None)
-    trade_endp = TradeEndpoint(forge_addr, forge_pkey, trade_port)
+    search_endp = SearchEndpoint(search_port, trade_port, gallery_addr, None, offset)
+    trade_endp = TradeEndpoint(trade_port, forge_addr, forge_pkey)
     profile_ctrl = ProfileCtrl(profile_endp, search_endp)
     search_ctrl = SearchCtrl(search_endp)
     collection_ctrl = CollectionCtrl(profile_ctrl, collection_endp, search_endp, forge_vkey)

@@ -22,11 +22,11 @@ class TradeEndpoint(Endpoint):
 
     OFFSET = 5
 
-    def __init__(self, forge_addr, forge_key: PublicKey, trade_port: int):
+    def __init__(self, trade_port: int, forge_addr, forge_key: PublicKey):
+        self.__trade_port = trade_port
         self.__forge_addr = forge_addr
         self.__forge_key = forge_key
         self.__listeners = ([], [], [], [], [])
-        self.__trade_port = trade_port
     
     def set_username(self, username: str):
         self.__username = username

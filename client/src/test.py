@@ -1,3 +1,4 @@
+import uuid
 from model.misc import GemList
 from nacl.public import PrivateKey
 from network.search import SearchEndpoint
@@ -28,15 +29,16 @@ pkey2 = skey2.public_key
 
 def local_search():
     if argv[1] == '1':
-        endp = SearchEndpoint(None, 7515, None)
-        endp.set_username("alice")
+        endp = SearchEndpoint(7515, 7516, None, None, 5)
+        endp.set_identity(str(uuid.uuid4()), 'alice')
         endp.set_keys(skey, pkey)
         endp.sync_gallery(GemList(['Ruby', 'Sapphire'], ['Amethyst', 'Pearl']))
-        endp.local_search(lambda s: print(f'Found: {s}'))
+        results = endp.local_search()
+        print(results)
     else:
-        endp = SearchEndpoint(None, 7520, None)
-        endp.set_username("bob")
-        endp.set_keys(skey, pkey)
+        endp = SearchEndpoint(7520, 7521, None, None, -5)
+        endp.set_identity(str(uuid.uuid4()), 'bob')
+        endp.set_keys(skey2, pkey2)
         endp.sync_gallery(GemList(['Pearl', 'Rose Quartz'], ['Sapphire']))
         endp.listen()
 
@@ -63,4 +65,4 @@ def trade():
     threading.Thread(target=t1).start()
 
 
-trade()
+local_search()

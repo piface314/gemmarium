@@ -10,6 +10,9 @@ class Endpoint:
     
     def get_pkey(self):
         return self.__public_key
+    
+    def get_skey(self):
+        return self.__private_key
 
     def enc_msg(self, pkey: PublicKey, op, **args):
         if pkey:
