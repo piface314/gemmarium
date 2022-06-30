@@ -4,6 +4,7 @@ from model.misc import GemList
 from model.trade import Trade
 from nacl.public import PublicKey
 from network.endpoint import Endpoint
+from network.search import SearchEndpoint
 from exceptions import UnknownError
 import socket
 import threading
@@ -30,11 +31,12 @@ class TradeNotStarted(Exception):
 
 class TradeEndpoint(Endpoint):
 
-    def __init__(self, trade_port: int, forge_addr, forge_key: PublicKey):
-        self.__trade_port = trade_port
+    def __init__(self, search_endp: SearchEndpoint, forge_addr, forge_key: PublicKey):
+        self.__search_endp = search_endp
+        self.__port = 0
         self.__forge_addr = forge_addr
         self.__forge_key = forge_key
-        self.__listeners = ([], [], [], [], [], [])
+        self.__listeners = {ev: [] for ev in TradeEvent}
         self.__connections = {}
     
     def set_identity(self, id: str, username: str):
@@ -42,7 +44,7 @@ class TradeEndpoint(Endpoint):
         self.__username = username
     
     def bind(self, ev: TradeEvent, cb):
-        self.__listeners[ev.value].append(cb)
+        self.__listeners[ev].append(cb)
     
     def get_connection(self, peerid: str):
         try:
@@ -52,10 +54,12 @@ class TradeEndpoint(Endpoint):
 
     def listen(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", self.__trade_port))
+            s.bind(("", 0))
+            self.__port = s.getsockname()[1]
+            self.__search_endp.set_trade_port(self.__port)
             s.listen()
             while True:
-                print("TradeEndpoint: Listening...")
+                print(f"TradeEndpoint: Listening on port {self.__port}...")
                 conn, addr = s.accept()
                 worker = threading.Thread(
                     target=self.handle,
@@ -78,14 +82,14 @@ class TradeEndpoint(Endpoint):
                         if op != 'trade':
                             raise BadTradeStart()
                         print(f"TradeEndpoint@{addr}: trade start")
-                        for cb in self.__listeners[TradeEvent.TRADE.value]:
+                        for cb in self.__listeners[TradeEvent.TRADE]:
                             cb(ip=addr[0], key=pkey, **args)
                         peerid = args['peerid']
                         self.__send_ack(conn, pkey)
                         continue
                     ev = TradeEvent[op.upper()]
                     print(f"TradeEndpoint@{addr}: {ev}")
-                    for cb in self.__listeners[ev.value]:
+                    for cb in self.__listeners[ev]:
                         cb(peerid=peerid,**args)
                     self.__send_ack(conn, pkey)
             except BrokenPipeError:
@@ -105,7 +109,7 @@ class TradeEndpoint(Endpoint):
         s.connect((trade.ip, trade.port))
         peerid = self.__id
         peername = self.__username
-        port = self.__trade_port
+        port = self.__port
         msg = self.enc_msg(trade.key, "trade", peerid=peerid, peername=peername, port=port)
         self.send_key(s, trade.key)
         self.send_size(s, trade.key, msg)

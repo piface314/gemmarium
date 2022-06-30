@@ -9,7 +9,7 @@ class TradeCtrl:
 
     def __init__(self, col_ctrl: CollectionCtrl, endp: TradeEndpoint):
         self.__collection_ctrl = col_ctrl
-        self.__listeners = tuple([] for _ in range(7))
+        self.__listeners = {ev: [] for ev in TradeEvent}
         self.__endpoint = endp
         self.__trades: dict[str, Trade] = {}
         endp.bind(TradeEvent.TRADE,
@@ -24,16 +24,16 @@ class TradeCtrl:
         endp.bind(TradeEvent.GEMS, lambda peerid, gems, **_: self.receive(self.get_trade(peerid), gems))
 
     def bind(self, ev: TradeEvent, cb):
-        listeners = self.__listeners[ev.value]
+        listeners = self.__listeners[ev]
         i = len(listeners)
         listeners.append(cb)
         return i
     
     def unbind(self, ev: TradeEvent, i: int):
-        ls = self.__listeners[ev.value]
+        ls = self.__listeners[ev]
         if not 0 <= i < len(ls):
             return
-        self.__listeners[ev.value] = ls[:i] + ls[i+1:]
+        self.__listeners[ev] = ls[:i] + ls[i+1:]
 
     def list(self):
         trades = self.__trades.values()
@@ -55,7 +55,7 @@ class TradeCtrl:
             trade = self.add_trade(Trade.from_search_result(sr))
             self.__endpoint.start(trade)
             if not from_self:
-                for cb in self.__listeners[TradeEvent.TRADE.value]:
+                for cb in self.__listeners[TradeEvent.UPDATE]:
                     cb(self.__trades[sr.id])
         return self.__trades[sr.id]
 
@@ -71,7 +71,7 @@ class TradeCtrl:
             trade.last_update_at = datetime.now()
             trade.peer_gems = gems
             trade.unseen = True
-            for cb in self.__listeners[TradeEvent.UPDATE.value]:
+            for cb in self.__listeners[TradeEvent.UPDATE]:
                 cb(trade)
 
     def accept(self, trade: Trade, from_self: bool = True):
@@ -85,12 +85,12 @@ class TradeCtrl:
             trade.last_update_at = datetime.now()
             trade.peer_accepted = True
             trade.unseen = True
-            for cb in self.__listeners[TradeEvent.ACCEPT.value]:
+            for cb in self.__listeners[TradeEvent.ACCEPT]:
                 cb(trade)
         if trade.self_accepted and trade.peer_accepted:
             gems = [gem.payload for gem in trade.self_gems.offered]
             self.__endpoint.send_gems(trade, gems)
-            for cb in self.__listeners[TradeEvent.FINISH.value]:
+            for cb in self.__listeners[TradeEvent.FINISH]:
                 cb(trade)
 
     def reject(self, trade: Trade, from_self: bool = True):
@@ -103,7 +103,9 @@ class TradeCtrl:
                 self.__trades.pop(trade.peername, None)
         else:
             self.__trades.pop(trade.peername, None)
-            for cb in self.__listeners[TradeEvent.REJECT.value]:
+            for cb in self.__listeners[TradeEvent.REJECT]:
+                cb(None)
+            for cb in self.__listeners[TradeEvent.FINISH]:
                 cb(None)
 
     def fuse(self, trade: Trade, from_self: bool = True):
@@ -117,7 +119,7 @@ class TradeCtrl:
             trade.last_update_at = datetime.now()
             trade.peer_fusion = True
             trade.unseen = True
-            for cb in self.__listeners[TradeEvent.FUSION.value]:
+            for cb in self.__listeners[TradeEvent.FUSION]:
                 cb(trade)
         if trade.self_fusion and trade.peer_fusion:
             # TODO
@@ -127,6 +129,6 @@ class TradeCtrl:
         gems = [self.__collection_ctrl.new_gem(g) for g in gems]
         for gem in gems:
             self.__collection_ctrl.add_gem(gem)
-        for cb in self.__listeners[TradeEvent.GEMS.value]:
+        for cb in self.__listeners[TradeEvent.GEMS]:
             cb(trade, gems)
         self.__trades.pop(trade.peerid, None)

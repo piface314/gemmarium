@@ -10,9 +10,9 @@ import traceback
 
 class SearchEndpoint(Endpoint):
 
-    def __init__(self, search_port: int, trade_port: int, gallery_addr, gallery_key: PublicKey, offset: int = 0):
+    def __init__(self, search_port: int, gallery_addr, gallery_key: PublicKey, offset: int = 0):
         self.__search_port = search_port
-        self.__trade_port = trade_port
+        self.__trade_port = 0
         self.__gallery_addr = gallery_addr
         self.__gallery_key = gallery_key
         self.__gallery = GemList([], [])
@@ -24,6 +24,9 @@ class SearchEndpoint(Endpoint):
     def set_identity(self, id: str, username: str):
         self.__id = id
         self.__username = username
+    
+    def set_trade_port(self, port: int):
+        self.__trade_port = port
     
     def listen(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:

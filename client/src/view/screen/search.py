@@ -1,4 +1,5 @@
 from ctrl.search import SearchCtrl
+from ctrl.trade import TradeCtrl
 from kivy.app import App
 from kivy.clock import mainthread
 from kivy.factory import Factory
@@ -14,8 +15,8 @@ Builder.load_file('src/view/screen/search.kv')
 
 class SearchPopup(Popup):
 
-    data = ObjectProperty(SearchResult("", "", 0, b'', GemList([], [])))
-    manager = ObjectProperty(None)
+    data = ObjectProperty(SearchResult("", "", "", 0, b'', GemList([], [])))
+    start_trade = ObjectProperty(None)
 
 
 class SearchScreen(Screen):
@@ -26,8 +27,8 @@ class SearchScreen(Screen):
     search_icon = ObjectProperty(None)
     gsearch_icon = ObjectProperty(None)
 
-    def on_enter(self, *args):
-        super().on_enter(*args)
+    def on_pre_enter(self, *args):
+        super().on_pre_enter(*args)
         app = App.get_running_app()
         bar = self.ids['header']
         bar.lt_btn = [app.get_back_button()]
@@ -73,7 +74,30 @@ class SearchScreen(Screen):
     
     def goto_result(self, row):
         sr = self.results[row.index]
-        popup = SearchPopup(data=sr, manager=self.manager)
+        popup = SearchPopup(
+            data=sr,
+            start_trade=self.start_trade
+        )
         popup.open()
+    
+    def start_trade(self, sr: SearchResult):
+        app = App.get_running_app()
+        ctrl: TradeCtrl = app.trade_ctrl
+        loading = Loading()
+        def cb():
+            try:
+                trade = ctrl.start_trade(sr)
+                app.current_peer = trade.peerid
+                self.goto_trade()
+            except:
+                self.show_warning("Erro desconhecido.")
+            finally:
+                loading.dismiss()
+        worker = threading.Thread(target=cb)
+        loading.open()
+        worker.start()
         
+    @mainthread
+    def goto_trade(self):
+        self.manager.current = 'trade'
         

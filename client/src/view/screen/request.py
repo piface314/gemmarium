@@ -4,7 +4,7 @@ from kivy.app import App
 from kivy.clock import Clock, mainthread
 from kivy.factory import Factory
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, NumericProperty, StringProperty
+from kivy.properties import ObjectProperty, NumericProperty, StringProperty, BooleanProperty
 from kivy.uix.screenmanager import Screen
 from model.gem import Gem
 from view.component.popup import Loading, Warning
@@ -18,11 +18,12 @@ Builder.load_file('src/view/screen/request.kv')
 class RequestScreen(Screen):
 
     gem = ObjectProperty(None)
-    time = NumericProperty(0)
+    time = NumericProperty(None)
+    button_disabled = BooleanProperty(False)
     msg = StringProperty("...")
 
-    def on_enter(self, *args):
-        super().on_enter(*args)
+    def on_pre_enter(self, *args):
+        super().on_pre_enter(*args)
         app = App.get_running_app()
         bar = self.ids['header']
         bar.lt_btn = [app.get_back_button()]
@@ -61,6 +62,7 @@ class RequestScreen(Screen):
     def show_wait(self, e):
         self.time = e.args[0]
         self.msg = "Cota de solicitação excedida! Espere um pouco..."
+        self.button_disabled = True
         wl = Factory.WaitLabel()
         wl.text = self.format_time(self.time)
         layout = self.ids['display']
@@ -73,6 +75,7 @@ class RequestScreen(Screen):
             else:
                 layout.clear_widgets()
                 self.msg = "..."
+                self.button_disabled = False
                 self.ev.cancel()
         self.ev = Clock.schedule_interval(update, 1)
     

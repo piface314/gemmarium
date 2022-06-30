@@ -31,8 +31,8 @@ class CollectionCtrl:
         self.__username = username
 
     def list_gems(self):
-        return sorted(self.__gems.values(),
-            key=lambda g: (g.obtained_at, g.name))
+        gems = sorted(self.__gems.values(), key=lambda g: g.name)
+        return sorted(gems, key=lambda g: g.obtained_at, reverse=True)
 
     def set_visibility(self, gem: Gem, is_public: bool):
         gem.is_public = is_public

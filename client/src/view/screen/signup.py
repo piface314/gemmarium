@@ -2,7 +2,7 @@ from ctrl.profile import ProfileCtrl
 from kivy.app import App
 from kivy.clock import mainthread
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen
 from view.component.popup import Loading, Warning
 from exceptions import *
@@ -14,7 +14,6 @@ Builder.load_file('src/view/screen/signup.kv')
 class SignupScreen(Screen):
 
     logo = ObjectProperty(None)
-    logged_in = BooleanProperty(False)
 
     def on_logo(self, _, logo):
         box_layout = self.ids['box_layout']
@@ -22,11 +21,10 @@ class SignupScreen(Screen):
         logo.size_hint = (1, 1)
         logo.allow_stretch = True
         box_layout.add_widget(logo, len(box_layout.children))
-    
+        
     @mainthread
-    def on_logged_in(self, _, val):
-        if val:
-            self.manager.current = 'menu'
+    def goto_menu(self):
+        self.manager.current = 'menu'
 
     def signup(self):
         loading = Loading()
@@ -44,7 +42,7 @@ class SignupScreen(Screen):
         try:
             ctrl: ProfileCtrl = App.get_running_app().profile_ctrl
             ctrl.signup(t)
-            self.logged_in = True
+            self.goto_menu()
         except UsernameTakenError:
             self.show_warning("Nome de usuário já cadastrado!")
         except InvalidUsernameError:

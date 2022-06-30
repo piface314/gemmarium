@@ -23,7 +23,7 @@ class ProfileCtrl:
     
     def __emit(self):
         for cb in self.__observers:
-            cb(self.___profile)
+            cb(self.__profile)
     
     def get_username(self):
         return self.__profile.username

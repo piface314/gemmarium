@@ -8,7 +8,7 @@ Builder.load_file('src/view/screen/wanted.kv')
 
 class WantedScreen(Screen):
 
-    def on_enter(self, *args):
+    def on_pre_enter(self, *args):
         super().on_enter(*args)
         app = App.get_running_app()
         back, icon = app.get_back_button()
@@ -20,7 +20,12 @@ class WantedScreen(Screen):
         str_list = self.ids['str_list']
         str_list.del_icon = app.get_texture('buttons-reject')
         str_list.add_icon = app.get_texture('buttons-add')
+    
+    def on_enter(self, *args):
+        super().on_enter(*args)
+        app = App.get_running_app()
         ctrl: CollectionCtrl = app.collection_ctrl
+        str_list = self.ids['str_list']
         str_list.strs = ctrl.list_wanted()
     
     def save(self):

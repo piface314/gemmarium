@@ -1,3 +1,6 @@
+#:import Sprite view.component.sprite.Sprite
+#:import rects view.component.sprite.logo_rects
+
 <MenuScreen>:
     logo: Sprite.from_file('res/logo.png', rects)
     on_enter: self.username = app.profile_ctrl.get_username()

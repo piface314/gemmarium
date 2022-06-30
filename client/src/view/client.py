@@ -25,6 +25,8 @@ class ClientApp(App):
                  **kwargs):
         super(ClientApp, self).__init__(**kwargs)
         self.screen_history = []
+        self.textures = {}
+        self.current_peer = None
         self.collection_ctrl = collection_ctrl
         self.profile_ctrl = profile_ctrl
         self.search_ctrl = search_ctrl
@@ -33,8 +35,6 @@ class ClientApp(App):
     def build(self):
         self.icon = 'res/icon.png'
         self.title = 'Gemmarium'
-        self.textures = {}
-        self.current_trade = None
 
         sm = ScreenManager(transition=CardTransition())
         if not self.profile_ctrl.is_logged_in():
@@ -87,6 +87,13 @@ class ClientApp(App):
             self.root.transition = FallOutTransition()
             self.root.current = sc
             self.root.transition = t
+    
+    def back_to_menu(self, *args):
+        self.screen_history = []
+        t = self.root.transition
+        self.root.transition = FallOutTransition()
+        self.root.current = 'menu'
+        self.root.transition = t
     
     def get_back_button(self):
         return (self.go_back, self.get_texture('buttons-back'))

@@ -7,6 +7,10 @@ class Trade:
     @staticmethod
     def from_search_result(sr: SearchResult):
         return Trade(sr.id, sr.peername, sr.ip, sr.port, sr.key)
+    
+    @classmethod
+    def empty(cls):
+        return Trade("", "", "", 0, None)
 
     def __init__(self,
                  peerid: str,
@@ -35,6 +39,13 @@ class Trade:
         self.peer_fusion = peer_fusion
         self.self_gems = GemList(set(), set()) if self_gems is None else self_gems
         self.peer_gems = GemList(set(), set()) if peer_gems is None else peer_gems
+
+    def copy(self):
+        return Trade(self.peerid, self.peername, self.ip, self.port,
+                self.key, self.unseen, self.last_update_at,
+                self.self_accepted, self.peer_accepted,
+                self.self_fusion,self.peer_fusion, 
+                self.self_gems, self.peer_gems)
 
     def __repr__(self):
         addr = f', {self.ip}:{self.port}'

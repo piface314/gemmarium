@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 if [[ -n "$1" ]]; then
   search_port=$1
-  trade_port=$2
-  vault_ip=$3
-  vault_port=$4
-  forge_ip=$5
-  forge_port=$6
-  db_fp=$7
-  offset=$8
+  vault_ip=$2
+  vault_port=$3
+  forge_ip=$4
+  forge_port=$5
+  db_fp=$6
+  offset=$7
 else
   search_port="7515"
-  trade_port="7516"
   vault_ip="127.0.0.1"
   vault_port="7513"
   forge_ip="127.0.0.1"
@@ -28,5 +26,4 @@ if [[ ! -d .venv ]]; then
 else
   source .venv/bin/activate
 fi
-python3 src/main.py "$search_port" "$trade_port" \
-    "$vault_ip" "$vault_port" "$forge_ip" "$forge_port" "$db_fp" "$offset"
+python3 src/main.py "$search_port" "$vault_ip" "$vault_port" "$forge_ip" "$forge_port" "$db_fp" "$offset"

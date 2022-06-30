@@ -14,8 +14,8 @@ class CollectionScreen(Screen):
 
     gems = ListProperty([])
 
-    def on_enter(self, *args):
-        super().on_enter(*args)
+    def on_pre_enter(self, *args):
+        super().on_pre_enter(*args)
         app = App.get_running_app()
         bar = self.ids['header']
         bar.lt_btn = [app.get_back_button()]
@@ -23,6 +23,10 @@ class CollectionScreen(Screen):
             (self.goto_wanted, app.get_texture('buttons-edit_wanted')),
             (self.goto_offered, app.get_texture('buttons-edit_offered')),
         ]
+    
+    def on_enter(self, *args):
+        super().on_enter(*args)
+        app = App.get_running_app()
         self.ctrl: CollectionCtrl = app.collection_ctrl
         self.gems = self.ctrl.list_gems()
 
