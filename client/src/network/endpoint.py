@@ -40,7 +40,10 @@ class Endpoint:
     
     def recv_size(self, conn, pkey: PublicKey):
         box = Box(self.__private_key, pkey)
-        size = box.decrypt(conn.recv(44))
+        payload = conn.recv(44)
+        if not payload:
+            raise BrokenPipeError
+        size = box.decrypt(payload)
         return int.from_bytes(size, 'little')
 
     def send_size(self, conn, pkey: PublicKey, msg: bytes):

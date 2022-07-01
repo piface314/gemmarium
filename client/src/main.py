@@ -1,8 +1,17 @@
+from kivy.config import Config
+Config.read('config.ini')
+Config.set('graphics', 'width', 378)
+Config.set('graphics', 'height', 672)
+Config.set('kivy', 'default_font', [
+    'res/regular.ttf',
+    'res/bold.ttf',
+])
+Config.write()
+
 from ctrl.collection import CollectionCtrl
 from ctrl.profile import ProfileCtrl
 from ctrl.search import SearchCtrl
 from ctrl.trade import TradeCtrl
-from kivy.config import Config
 from model import Model
 from nacl.public import PublicKey, PrivateKey
 from nacl.signing import VerifyKey
@@ -56,14 +65,6 @@ if __name__ == '__main__':
     threading.Thread(target=search_endp.listen, daemon=True).start()
     threading.Thread(target=trade_endp.listen, daemon=True).start()
 
-    Config.read('config.ini')
-    Config.set('graphics', 'width', 378)
-    Config.set('graphics', 'height', 672)
-    Config.set('kivy', 'default_font', [
-        'res/regular.ttf',
-        'res/bold.ttf',
-    ])
-    Config.write()
     ClientApp(
         collection_ctrl,
         profile_ctrl,

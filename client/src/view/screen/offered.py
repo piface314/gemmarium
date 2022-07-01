@@ -51,7 +51,7 @@ class OfferedScreen(Screen):
         ctrl: CollectionCtrl = app.collection_ctrl
         ctrl.sync_gallery()
     
-    def handle_toggle(self, gem, val):
+    def handle_toggle(self, gem, val, *args):
         app = App.get_running_app()
         ctrl: CollectionCtrl = app.collection_ctrl
         ctrl.set_visibility(gem, val)

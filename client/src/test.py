@@ -63,7 +63,7 @@ def trade():
         endp = TradeEndpoint(int(argv[1]), None, None)
         endp.set_identity(id1, "alice")
         endp.set_keys(skey, pkey)
-        sr = SearchResult(id2, 'bob', "127.0.0.1", int(argv[2]), pkey2, bob_gallery)
+        sr = SearchResult(id2, 'bob', "127.0.0.1", int(argv[2]), pkey2, bob_gallery, False)
         ctrl = TradeCtrl(ColCtrl(alice_gallery), endp)
         ctrl.bind(TradeEvent.TRADE, lambda trade: print(f'Alice <- Bob: {trade}'))
         ctrl.bind(TradeEvent.UPDATE, lambda trade: print(f'Alice <- Bob: {trade}'))

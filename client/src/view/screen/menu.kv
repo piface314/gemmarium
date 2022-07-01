@@ -3,7 +3,6 @@
 
 <MenuScreen>:
     logo: Sprite.from_file('res/logo.png', rects)
-    on_enter: self.username = app.profile_ctrl.get_username()
     BoxLayout:
         id: box_layout
         orientation: 'vertical'
@@ -29,6 +28,20 @@
             size_hint: 1, 0.15
             on_release: root.manager.current = 'search'
         Button:
+            id: trade_btn
             text: 'Trocas'
             size_hint: 1, 0.15
             on_release: root.manager.current = 'trade_list'
+    Label:
+        text: str(root.unseen)
+        size: self.texture_size[0] + sp(8), self.texture_size[1] + sp(4)
+        size_hint: None, None
+        opacity: 1.0 if root.unseen else 0.0
+        center: trade_btn.x + trade_btn.width, trade_btn.y + trade_btn.height
+        font_size: 14
+        canvas.before:
+            Color:
+                rgba: 1, 0, 0, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size

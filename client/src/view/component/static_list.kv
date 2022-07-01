@@ -1,6 +1,7 @@
 #:set gpad sp(10)
 
 <LabelRow>:
+    size_hint: 1, None
     text_size: root.width, None
     size: self.texture_size
     text: root.text
@@ -14,18 +15,20 @@
         Rectangle:
             size: self.width, 1
             pos: self.x, self.y + self.height + gpad/2
+        Color:
+            rgba: 1, 0, 0, 1 if self.marker else 0
+        Ellipse:
+            pos: self.x + self.width - gpad*3, self.y + self.height/2 - gpad
+            size: gpad*2, gpad*2
     
 
 <StaticList>:
     do_scroll_x: False
     do_scroll_y: True
-    GridLayout:
+    StackLayout:
         id: static_list
         size_hint_y: None
         width: root.width
         height: self.minimum_height
-        cols: 1
-        col_default_width: root.width - gpad*2
-        row_default_height: root.row_height
         spacing: gpad
         padding: gpad

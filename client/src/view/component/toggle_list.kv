@@ -3,7 +3,9 @@
 
 <ToggleRow>:
     orientation: 'horizontal'
-    spacing: sp(5)
+    spacing: sp(8)
+    size_hint_y: None
+    height: self.icon_size
     canvas.before:
         Color:
             rgba: 1, 1, 1, 1 if self.index else 0
@@ -11,17 +13,21 @@
             size: self.width, 1
             pos: self.x, self.y + self.height + gpad/2
     Label:
+        id: row_label
+        size_hint: 1, None
+        height: root.icon_size
         text_size: self.size
         text: root.text
         markup: True
         halign: 'left'
         valign: 'middle'
+        pos_hint: {'x': 0, 'center_y': 0.5}
         font_size: 16
     IconButton:
         icon: root.check_icon
         icon_color: 1, 1, 1, int(root.value)
         size_hint: None, None
-        size: self.parent.size[1]//2, self.parent.size[1]//2
+        size: min(sp(48), self.parent.size[1]//2), min(sp(48), self.parent.size[1]//2)
         padding: sp(4), sp(4)
         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         on_release:
@@ -34,13 +40,10 @@
     ScrollView:
         do_scroll_x: False
         do_scroll_y: True
-        GridLayout:
+        StackLayout:
             id: toggle_list
             size_hint_y: None
             width: root.width
             height: self.minimum_height
-            cols: 1
-            col_default_width: root.width - gpad*2
-            row_default_height: sp(64)
             spacing: gpad
             padding: gpad

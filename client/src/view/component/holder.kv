@@ -6,7 +6,22 @@
             pos: 0, -10
             size: self.size
     Image:
-        source: 'res/base.png'
+        id: base
         allow_stretch: True
         size_hint: 1, 1
         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+<GemShow@Popup>:
+    size_hint: 0.9, 0.75
+    auto_dismiss: True
+    title_align: 'center'
+    title: ''
+    text: ''
+    BoxLayout:
+        id: layout
+        orientation: 'vertical'
+        padding: sp(5)
+        spacing: sp(10)
+        Label:
+            text: root.text
+            halign: 'left'

@@ -59,6 +59,10 @@ class CollectionCtrl:
     def add_gem(self, gem: Gem):
         self.__gems[gem.id] = gem
         gem.save()
+    
+    def remove_gem(self, gem: Gem):
+        self.__gems.pop(gem.id, None)
+        gem.delete()
 
     def request_gem(self):
         uid = self.__id

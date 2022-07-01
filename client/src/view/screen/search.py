@@ -10,12 +10,13 @@ from kivy.uix.screenmanager import Screen
 from model.misc import GemList, SearchResult
 from view.component.popup import Loading, Warning
 import threading
+import traceback
 
 Builder.load_file('src/view/screen/search.kv')
 
 class SearchPopup(Popup):
 
-    data = ObjectProperty(SearchResult("", "", "", 0, b'', GemList([], [])))
+    data = ObjectProperty(SearchResult("", "", "", 0, b'', GemList([], []), False))
     start_trade = ObjectProperty(None)
 
 
@@ -47,7 +48,8 @@ class SearchScreen(Screen):
         res.labels = [self.format_label(r) for r in self.results]
     
     def format_label(self, res: SearchResult):
-        return f'@{res.peername}\n[size=12][color=cccccc]{res.gems[int(self.query_type)]}[/color][/size]'
+        color = 'ffcc00' if res.matches else 'cccccc'
+        return f'@{res.peername}\n[size=12][color={color}]{res.gems[int(self.query_type)]}[/color][/size]'
 
     def search(self, query):
         loading = Loading()
@@ -62,7 +64,8 @@ class SearchScreen(Screen):
     def resolve_search(self, loading, query, is_local):
         try:
             self.results = self.ctrl.search(query, self.query_type, is_local=is_local)
-        except:
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
             self.show_warning("Erro desconhecido.")
         finally:
             loading.dismiss()

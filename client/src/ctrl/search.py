@@ -12,8 +12,16 @@ class SearchCtrl:
             results = self.__search_endp.local_search(wait=wait)
         else:
             results = self.__search_endp.global_search(query, owned)
-        return sorted(results, key=lambda res: (
-            query.lower() not in ','.join(res.gems.offered if owned else res.gems.wanted).lower(),
-            res.peername
-            ))
+        results = [self.matches_query(sr, query, owned) for sr in results]
+        return sorted(results, key=lambda sr: (not sr.matches, sr.peername))
+        
+    def matches_query(self, sr: SearchResult, query: str, owned: bool):
+        query = query.strip().lower()
+        match = False
+        if query:
+            for name in sr.gems.offered if owned else sr.gems.wanted:
+                if query in name.strip().lower():
+                    match = True
+                    break
+        return SearchResult(sr.id, sr.peername, sr.ip, sr.port, sr.key, sr.gems, match)
         

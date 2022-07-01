@@ -58,3 +58,9 @@ class Gem(Model):
             db.execute(f'REPLACE INTO gem VALUES (?{", ?"*n})', data)
             db.commit()
         db.close()
+    
+    def delete(self):
+        db = self.connect()
+        with self.__lock:
+            db.execute(f'DELETE FROM gem WHERE id = ?', (self.id,))
+            db.commit()

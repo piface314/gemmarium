@@ -93,7 +93,9 @@ class RequestScreen(Screen):
         gem.allow_stretch = True
         gem.size_hint = (0.5, 0.5)
         gem.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        app = App.get_running_app()
         holder = GemHolder(highlight=False)
+        holder.ids['base'].texture = app.get_texture('base')
         holder.size_hint = (0.6, 0.6)
         holder.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         holder.add_widget(gem)

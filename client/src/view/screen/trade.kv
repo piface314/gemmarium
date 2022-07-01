@@ -23,6 +23,17 @@
                 Line:
                     points: self.x, self.y+self.height/2, self.x+self.width, self.y+self.height/2
                     width: 1
+            canvas:
+                Color:
+                    rgba: root.self_overlay
+                Rectangle:
+                    pos: self.x, self.y
+                    size: self.width, self.height/2
+                Color:
+                    rgba: root.peer_overlay
+                Rectangle:
+                    pos: self.x, self.y+self.height/2
+                    size: self.width, self.height/2
             BoxLayout:
                 orientation: 'vertical'
                 Label:
@@ -41,6 +52,8 @@
                     id: peer_offered
             ToggleList:
                 id: self_offered
+                handle_toggle: root.handle_toggle
+                icon_size: 32
             StrList:
                 id: self_wanted
                 hint_text: "Nome de gema..."

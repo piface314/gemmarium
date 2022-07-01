@@ -1,21 +1,6 @@
 #:import Bar view.component.bar.Bar
 #:set gem_size 96
 
-<GemShow@Popup>:
-    size_hint: 0.9, 0.75
-    auto_dismiss: True
-    title_align: 'center'
-    title: ''
-    text: ''
-    BoxLayout:
-        id: layout
-        orientation: 'vertical'
-        padding: sp(5)
-        spacing: sp(10)
-        Label:
-            text: root.text
-            halign: 'left'
-
 <CollectionScreen>:
     BoxLayout:
         orientation: 'vertical'
@@ -36,4 +21,8 @@
                 col_default_width: gem_size
                 spacing: sp(10)
                 padding: sp(10)
+    Label:
+        text: "Nenhuma gema"
+        center: root.center
+        opacity: 0.0 if len(root.gems) else 1.0
 

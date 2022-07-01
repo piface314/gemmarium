@@ -38,8 +38,8 @@ class SearchEndpoint(Endpoint):
                     print(f"SearchEndpoint: datagram from {addr}...")
                     pkey_raw, data = data[:32], data[32:]
                     pkey = PublicKey(pkey_raw)
-                    op, _ = json.loads(data)
-                    if op != 'search':
+                    op, args = json.loads(data)
+                    if op != 'search' or args['id'] == self.__id:
                         continue
                     print(f"SearchEndpoint: sending gallery to {addr}...")
                     reply = self.enc_msg(pkey, 'gallery',
@@ -57,7 +57,7 @@ class SearchEndpoint(Endpoint):
     
     def local_search(self, wait=1):
         results = []
-        msg = self.get_pkey().encode() + json.dumps(['search', {}]).encode()
+        msg = self.get_pkey().encode() + json.dumps(['search', dict(id=self.__id)]).encode()
         interfaces = socket.getaddrinfo(host=socket.gethostname(), port=None, family=socket.AF_INET)
         ips = {ip[-1][0] for ip in interfaces}
         ips.add("")
@@ -82,10 +82,10 @@ class SearchEndpoint(Endpoint):
                 pkey_raw, data = data[:80], data[80:]
                 pkey = PublicKey(SealedBox(self.get_skey()).decrypt(pkey_raw))
                 op, args = self.dec_msg(pkey, data)
-                if op != 'gallery' or args['id'] == self.__id:
+                if op != 'gallery':
                     continue
                 gl = GemList(args['wanted'], args['offered'])
-                res = SearchResult(args['id'], args['username'], addr[0], args['port'], pkey, gl)
+                res = SearchResult(args['id'], args['username'], addr[0], args['port'], pkey, gl, False)
                 with self.__lock:
                     results.append(res)
                 wait += 0.2

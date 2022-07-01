@@ -1,3 +1,4 @@
+from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty
 from kivy.uix.behaviors import ButtonBehavior
@@ -14,6 +15,7 @@ class GemHolder(ButtonBehavior, RelativeLayout):
 
     @classmethod
     def from_gem(self, gem: Gem, highligh=False):
+        app = App.get_running_app()
         gem_sp = Sprite.from_bytes(
             gem.sprite,
             gem_rects,
@@ -24,5 +26,6 @@ class GemHolder(ButtonBehavior, RelativeLayout):
         gem_sp.size_hint = (0.5, 0.5)
         gem_sp.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         holder = GemHolder(highlight=highligh)
+        holder.ids['base'].texture = app.get_texture('base')
         holder.add_widget(gem_sp)
         return holder

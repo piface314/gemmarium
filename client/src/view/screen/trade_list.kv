@@ -1,3 +1,18 @@
+#:import StaticList view.component.static_list.StaticList
+
 <TradeListScreen>:
     BoxLayout:
         orientation: 'vertical'
+        Bar:
+            id: header
+            title: "Trocas"
+            bgcolor: (.2, .2, .2, 1)
+            size_hint: None, None
+        StaticList:
+            id: trade_list
+            handle: root.goto_trade
+            padding: sp(16)
+    Label:
+        text: "Nenhuma troca"
+        center: root.center
+        opacity: 0.0 if len(root.trades) else 1.0

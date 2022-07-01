@@ -3,7 +3,8 @@ from kivy.properties import (
     ListProperty,
     StringProperty,
     ObjectProperty,
-    NumericProperty
+    NumericProperty,
+    BooleanProperty
 )
 from kivy.uix.label import Label
 from kivy.uix.behaviors import ButtonBehavior
@@ -16,6 +17,7 @@ class LabelRow(ButtonBehavior, Label):
 
     index = NumericProperty(0)
     text = StringProperty("")
+    marker = BooleanProperty(False)
 
 
 class StaticList(ScrollView):
@@ -28,7 +30,10 @@ class StaticList(ScrollView):
         layout = self.ids['static_list']
         layout.clear_widgets()
         for i, s in enumerate(val):
-            row = LabelRow(index=i, text=s)
+            mark = False
+            if type(s) is tuple:
+                s, mark = s
+            row = LabelRow(index=i, text=s, marker=mark)
             if callable(self.handle):
                 row.bind(on_release=self.handle)
             layout.add_widget(row)
