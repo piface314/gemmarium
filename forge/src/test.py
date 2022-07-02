@@ -1,15 +1,18 @@
 from nacl.public import PrivateKey, PublicKey, Box, SealedBox
-from nacl.signing import VerifyKey
+from nacl.signing import VerifyKey, SigningKey
 from nacl.encoding import Base64Encoder
 import json
 import socket
-import src.keys
+from database import Database
+from forge_ctrl import ForgeCtrl, FusionRequest
+import keys
 
 skey = PrivateKey(b't\x05\xb3\xd4\x199b*Q\xb4\t\x9eC_az@\xf4#y\xbbD\xe4\xe1$\x942\x89\xe0-\xbd\xe7')
 pkey = PublicKey(b'\xc1\x8a\xe8D1\xb9Q:\xcf\x88o\x1b\x8f\xea\xad\nv4\xce\xa2\xf0J\xcb\xa5\x9b\x0b\xa6\x80_$\xbds')
 
-forge_pkey = PublicKey(src.keys.forge_pkey)
-forge_vkey = VerifyKey(src.keys.forge_vkey)
+forge_pkey = PublicKey(keys.forge_pkey)
+forge_vkey = VerifyKey(keys.forge_vkey)
+forge_signkey = SigningKey(keys.forge_sign_key)
 
 def request(id):
     with socket.socket() as s:
@@ -41,4 +44,18 @@ def request(id):
         else:
             print(args)
 
-request('322d85b6-2188-4494-aba1-be9519c5f729')
+def find_fusion():
+    db = Database()
+    ctrl = ForgeCtrl(10, db, forge_signkey, forge_vkey)
+    gems_a = [{'tag': 'alexandrite'}, {'tag': 'sapphire'}]
+    gems_b = [{'tag': 'rose-quartz'}, {'tag': 'ruby'}]
+    req = FusionRequest()
+    req.user_a = 'alice'
+    req.user_b = 'bob'
+    req.gems_a = gems_a
+    req.gems_b = gems_b
+    print(ctrl.fuse(req))
+    
+
+# request('322d85b6-2188-4494-aba1-be9519c5f729')
+find_fusion()

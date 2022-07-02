@@ -30,7 +30,7 @@ class ProfileCtrl:
 
     def signup(self, username: str):
         try:
-            uid = self.__endpoint.signup(username, self.__profile.public_key)
+            uid = self.__endpoint.signup(username)
             self.__profile.id = uid
             self.__profile.username = username
             self.__profile.save()

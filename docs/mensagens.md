@@ -43,3 +43,4 @@ pode ser mostrado também da seguinte forma:
 - `[C ---> C] (gems, {gems:list[str]})`: envia dados de gemas.
 - `[C ---> C] (ack, {})`: confirma alguma ação.
 
+

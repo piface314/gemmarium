@@ -3,6 +3,7 @@ from ctrl.collection import CollectionCtrl
 from model.misc import GemList, SearchResult
 from model.trade import Trade
 from network.trade import TradeEndpoint, TradeEvent
+import threading
 
 
 class TradeCtrl:
@@ -11,7 +12,7 @@ class TradeCtrl:
         self.__collection_ctrl = col_ctrl
         self.__listeners = {ev: [] for ev in TradeEvent}
         self.__endpoint = endp
-        self.__trades: dict[str, Trade] = {}
+        self.__trades = {}
         endp.bind(TradeEvent.TRADE,
             lambda ip, key, peerid, peername, port, **_:
                 self.start_trade(SearchResult(peerid, peername, ip, port, key, GemList([], []), False), False))
@@ -21,7 +22,7 @@ class TradeCtrl:
         endp.bind(TradeEvent.ACCEPT, lambda peerid, **_: self.accept(self.get_trade(peerid), False))
         endp.bind(TradeEvent.REJECT, lambda peerid, **_: self.reject(self.get_trade(peerid), False))
         endp.bind(TradeEvent.FUSION, lambda peerid, **_: self.fuse(self.get_trade(peerid), False))
-        endp.bind(TradeEvent.GEMS, lambda peerid, gems, **_: self.receive(self.get_trade(peerid), gems))
+        endp.bind(TradeEvent.GEMS, lambda peerid, gems, **_: self.receive(peerid, gems))
         endp.bind(TradeEvent.ERROR, lambda peerid, **_: self.error(self.get_trade(peerid)))
         endp.bind(TradeEvent.CLOSE, lambda peerid, **_: self.close(self.get_trade(peerid)))
 
@@ -98,8 +99,7 @@ class TradeCtrl:
             trade.unseen = True
             self.__emit(TradeEvent.ACCEPT, trade=trade)
         if trade.self_accepted and trade.peer_accepted:
-            gems = [gem.payload for gem in trade.self_gems.offered]
-            self.__endpoint.send_gems(trade, gems)
+            self.__endpoint.send_gems(trade)
             for gem in trade.self_gems.offered:
                 self.__collection_ctrl.remove_gem(gem)
 
@@ -136,11 +136,20 @@ class TradeCtrl:
             trade.unseen = True
             self.__emit(TradeEvent.FUSION, trade=trade)
         if trade.self_fusion and trade.peer_fusion:
-            # TODO
-            pass
+            def cb():
+                print(f"TradeCtrl: let's fuuuuuuse")
+                try:
+                    self.__endpoint.fuse_to_forge(trade)
+                    for gem in trade.self_gems.offered:
+                        self.__collection_ctrl.remove_gem(gem)
+                except:
+                    self.__emit(TradeEvent.ERROR, trade=None)
+            threading.Thread(target=cb).start()
+            
     
-    def receive(self, trade: Trade, gems):
+    def receive(self, peerid: str, gems):
+        trade = self.get_trade(peerid)
         gems = [self.__collection_ctrl.new_gem(g) for g in gems]
         for gem in gems:
             self.__collection_ctrl.add_gem(gem)
-        self.__emit(TradeEvent.GEMS, sender=trade.peername, gems=gems)
+        self.__emit(TradeEvent.GEMS, sender=trade.peername if trade else peerid, gems=gems)

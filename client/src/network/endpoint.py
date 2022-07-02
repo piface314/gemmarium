@@ -50,4 +50,10 @@ class Endpoint:
         size = len(msg).to_bytes(4, 'little')
         box = Box(self.__private_key, pkey)
         conn.sendall(box.encrypt(size))
-        
+    
+    def recvall(self, conn, pkey: PublicKey):
+        size = self.recv_size(conn, pkey)
+        payload = b''
+        while size - len(payload) > 0:
+            payload += conn.recv(size - len(payload))
+        return payload

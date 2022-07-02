@@ -56,6 +56,13 @@ class Server:
         size = box.decrypt(conn.recv(44))
         return int.from_bytes(size, 'little')
     
+    def recvall(self, conn, pkey: PublicKey):
+        size = self.recv_size(conn, pkey)
+        payload = b''
+        while size - len(payload) > 0:
+            payload += conn.recv(size - len(payload))
+        return payload
+    
     def send_size(self, conn, pkey: PublicKey, msg: bytes):
         size = len(msg).to_bytes(4, 'little')
         box = Box(self.__private_key, pkey)
@@ -92,8 +99,7 @@ class Server:
                 while run:
                     if not keep:
                         run = False
-                    size = self.recv_size(conn, pkey)
-                    payload = conn.recv(size)
+                    payload = self.recv_all(conn, pkey)
                     op, args = self.dec_msg(pkey, payload)
                     handler = self.__getattribute__("handle_" + op)
                     handler(conn, addr, pkey, **args)

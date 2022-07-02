@@ -2,177 +2,177 @@
   "gems": {
     "alexandrite": {
       "name": "Alexandrita",
-      "desc": " ",
+      "desc": "Uma variedade do mineral crisoberilo, muda sua cor de acordo com a luz. Possui uma combinação rara de minerais.",
       "rarity": 0
     },
     "amazonite": {
       "name": "Amazonita",
-      "desc": "  ",
+      "desc": "Uma variação verde do feldspato. Seu nome é tirado do rio Amazonas, de onde essa pedra era obtida.",
       "rarity": 0
     },
     "amber": {
       "name": "Âmbar",
-      "desc": "   ",
+      "desc": "Uma gema orgânica, trata-se de uma resina fóssil formada por árvores pré-históricas.",
       "rarity": 10
     },
     "amethyst": {
       "name": "Ametista",
-      "desc": "  ",
+      "desc": "Variedade violeta do quartzo, cheia de significados místicos desde os tempos antigos.",
       "rarity": 100
     },
     "aquamarine": {
       "name": "Água-Marinha",
-      "desc": " ",
+      "desc": "Variedade do berilo, esta gema costuma ser quase transparente, como a água.",
       "rarity": 10
     },
     "bismuth": {
       "name": "Bismuto",
-      "desc": " ",
+      "desc": "Trata-se na verdade de um metal, mas sua aparência psicodélica pode lhe conferir o status de gema.",
       "rarity": 10
     },
     "blue-diamond": {
       "name": "Diamante Azul",
-      "desc": " ",
+      "desc": "O material natural mais duro que se conhece. Formado sob extrema pressão, este é um diamante azul.",
       "rarity": 1
     },
     "emerald": {
       "name": "Esmeralda",
-      "desc": " ",
+      "desc": "A mais nobre variante do berilo, esta gema verde é uma das mais valiosas.",
       "rarity": 10
     },
     "fluorite": {
       "name": "Fluorita",
-      "desc": " ",
+      "desc": "Em sua forma pura, esta gema é quase transparente, mas na prática costuma apresentar belos tons multicor.",
       "rarity": 10
     },
     "garnet": {
       "name": "Granada",
-      "desc": " ",
+      "desc": "Uma gema muito diversa em sua composição química e possíveis cores, seu nome vêm do latim, granatus (grão).",
       "rarity": 50
     },
     "green-quartz": {
       "name": "Quartzo Verde",
-      "desc": " ",
+      "desc": "Variante verde do quartzo, às vezes considerada mística por poderes curativos.",
       "rarity": 50
     },
     "jade": {
       "name": "Jade",
-      "desc": " ",
+      "desc": "Uma gema ornamental muito usada na cultura chinesa e japonesa, às vezes sendo chamada de jade imperial.",
       "rarity": 20
     },
     "jasper": {
       "name": "Jaspe",
-      "desc": " ",
+      "desc": "Uma variação opaca do quartzo, que às vezes apresenta até mesmo listras, mas costuma ter tons entre o vermelho e o marrom.",
       "rarity": 50
     },
     "lapis-lazuli": {
       "name": "Lápis-Lazúli",
-      "desc": " ",
+      "desc": "Rocha geralmente opaca com seu azul vibrante característico, altamente apreciada por faraós do Egito Antigo.",
       "rarity": 50
     },
     "malachite": {
       "name": "Malaquita",
-      "desc": " ",
+      "desc": "Um mineral do grupo dos carbonatos, apresenta mesmerizantes padrões listrados circulares em sua superfície.",
       "rarity": 0
     },
     "obsidian": {
       "name": "Obsidiana",
-      "desc": " ",
+      "desc": "Uma rocha ígnea extrusiva constituída quase integralmente por um tipo de vidro vulcânico, de um tom negro profundo.",
       "rarity": 0
     },
     "opal": {
       "name": "Opala",
-      "desc": " ",
+      "desc": "Trata-se de um mineral amorfo hidratado, com até 20% de água. Apresenta um interessante jogo de cores por cima de seus tons azulados.",
       "rarity": 0
     },
     "padparadscha": {
       "name": "Padparadscha",
-      "desc": " ",
+      "desc": "O tipo mais raro de safira, com tons alaranjados ou rosados.",
       "rarity": 10
     },
     "pearl": {
       "name": "Pérola",
-      "desc": " ",
+      "desc": "Trata-se de uma gema orgânica, formada no interior da concha de ostras e moluscos através de secreções de nácar.",
       "rarity": 100
     },
     "peridot": {
       "name": "Peridoto",
-      "desc": " ",
+      "desc": "Uma variedade de forsterite, uma das formas da olivina, de tons verdes e amarelo-esverdeados.",
       "rarity": 100
     },
     "pink-diamond": {
       "name": "Diamante Rosa",
-      "desc": " ",
+      "desc": "O material natural mais duro que se conhece. Formado sob extrema pressão, este é um diamante rosa.",
       "rarity": 1
     },
     "rainbow-quartz": {
       "name": "Quartzo Arco-Íris",
-      "desc": " ",
+      "desc": "É como um quartzo comum, porém que sofreu rachaduras e gotas de água foram absorvidas, permitindo a refração da luz nessa bela matiz.",
       "rarity": 0
     },
     "rhodonite": {
       "name": "Rodonita",
-      "desc": " ",
+      "desc": "Uma pedra de tons rosados a avermelhados, possui uma clivagem perfeita, geralmente em ângulos retos.",
       "rarity": 10
     },
     "rose-quartz": {
       "name": "Quartzo Rosa",
-      "desc": " ",
+      "desc": "A variação rosada do quartzo, considerada símbolo do amor. Sua cor se deve à presença de titânio em sua composição.",
       "rarity": 100
     },
     "ruby": {
       "name": "Rubi",
-      "desc": " ",
+      "desc": "Uma pedra preciosa vermelho-sangue a rosada, uma das mais famosas e mais valiosas. É a variação vermelha do coríndon.",
       "rarity": 100
     },
     "rutile": {
       "name": "Rutilo",
-      "desc": " ",
+      "desc": "Uma gema frágil, translúcida, porém de tons bem escuros.",
       "rarity": 10
     },
     "sapphire": {
       "name": "Safira",
-      "desc": " ",
+      "desc": "Uma pedra preciosa de tons azuis profundos, uma das mais famosas e mais valiosas. É a variação azul do coríndon.",
       "rarity": 100
     },
     "sardonyx": {
       "name": "Sardônix",
-      "desc": " ",
+      "desc": "Variação colorida do ônix, tornando seus padrões listrados avermelhados mais visíveis.",
       "rarity": 0
     },
     "smoky-quartz": {
       "name": "Quartzo Fumê",
-      "desc": " ",
+      "desc": "Uma variação de quartzo de cor castanha escura, que se deve à radiação absorvida de outros minerais.",
       "rarity": 0
     },
     "spinel": {
       "name": "Espinela",
-      "desc": " ",
-      "rarity": 0
+      "desc": "Uma pedra vermelha rosada, às vezes confundida com rubi, mas que possui uma cristalização diferenciada.",
+      "rarity": 10
     },
     "sugilite": {
       "name": "Sugilita",
-      "desc": " ",
+      "desc": "Um mineral púrpura pouco conhecido, tendo sido descoberto no Japão. Que mistérios essa pedra guarda?",
       "rarity": 0
     },
     "sunstone": {
       "name": "Heliolita",
-      "desc": " ",
+      "desc": "Mineral composto por várias rochas, formando cores alaranjadas vibrantes, como o sol, origem de seu nome.",
       "rarity": 0
     },
     "topaz": {
       "name": "Topázio",
-      "desc": " ",
+      "desc": "Pedra bastante usada em joalheria, de cristais comumente alaranjados, e de clivagem perfeita.",
       "rarity": 20
     },
     "white-diamond": {
       "name": "Diamante Branco",
-      "desc": " ",
+      "desc": "O material natural mais duro que se conhece. Formado sob extrema pressão, este é um diamante branco.",
       "rarity": 1
     },
     "yellow-diamond": {
       "name": "Diamante Amarelo",
-      "desc": " ",
+      "desc": "O material natural mais duro que se conhece. Formado sob extrema pressão, este é um diamante amarelo.",
       "rarity": 1
     }
   },

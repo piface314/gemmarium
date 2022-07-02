@@ -1,4 +1,5 @@
 from ctrl.profile import ProfileCtrl
+from datetime import datetime
 from exceptions import InvalidGemError
 from model.gem import Gem
 from model.misc import GemList
@@ -9,7 +10,6 @@ from nacl.encoding import Base64Encoder
 from nacl.exceptions import BadSignatureError
 from nacl.signing import VerifyKey
 import json
-from datetime import datetime
 
 class CollectionCtrl:
 
@@ -57,12 +57,12 @@ class CollectionCtrl:
         self.__search_endp.sync_gallery(gl)
 
     def add_gem(self, gem: Gem):
-        self.__gems[gem.id] = gem
         gem.save()
+        self.__gems[gem.id] = gem
     
     def remove_gem(self, gem: Gem):
-        self.__gems.pop(gem.id, None)
         gem.delete()
+        self.__gems.pop(gem.id, None)
 
     def request_gem(self):
         uid = self.__id

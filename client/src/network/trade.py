@@ -3,10 +3,10 @@ from model.gem import Gem
 from model.misc import GemList
 from model.trade import Trade
 from nacl.public import PublicKey
-from nacl.exceptions import ValueError
+from nacl.encoding import Base64Encoder
 from network.endpoint import Endpoint
 from network.search import SearchEndpoint
-from exceptions import UnknownError
+from exceptions import UnknownError, InvalidGemError
 import socket
 import threading
 import traceback
@@ -82,8 +82,7 @@ class TradeEndpoint(Endpoint):
             pkey = self.recv_key(conn)
             while True:
                 print(f"TradeEndpoint@{addr}: waiting for msg")
-                size = self.recv_size(conn, pkey)
-                payload = conn.recv(size)
+                payload = self.recvall(conn, pkey)
                 op, args = self.dec_msg(pkey, payload)
                 if peerid is None:
                     if op != 'trade':
@@ -173,9 +172,10 @@ class TradeEndpoint(Endpoint):
             self.__remove_connection(trade.peerid)
             raise e
     
-    def send_gems(self, trade: Trade, gems):
+    def send_gems(self, trade: Trade):
         try:
             s: socket.socket = self.get_connection(trade.peerid)
+            gems = [gem.payload for gem in trade.self_gems.offered]
             msg = self.enc_msg(trade.key, "gems", gems=gems)
             self.send_size(s, trade.key, msg)
             s.sendall(msg)
@@ -201,5 +201,41 @@ class TradeEndpoint(Endpoint):
         s.sendall(msg)
         self.__ack(s, trade.key)
 
-    def fuse_to_forge(self, gems: list[Gem]):
-        pass
+    def fuse_to_forge(self, trade: Trade):
+        pkey = self.__forge_key
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                # request
+                s.connect(self.__forge_addr)
+                print(f"TradeEndpoint: sending {[g.name for g in trade.self_gems.offered]} to fuse")
+                gems = [gem.payload for gem in trade.self_gems.offered]
+                msg = self.enc_msg(pkey, "fusion",
+                    gems=gems, id=self.__id, peerid=trade.peerid)
+                self.send_key(s, pkey)
+                self.send_size(s, pkey, msg)
+                s.sendall(msg)
+                
+                # auth
+                print(f"TradeEndpoint: waiting secret from Forge...")
+                data = s.recv(1024)
+                print(f"TradeEndpoint: got secret from Forge {len(data)} {data}...")
+                op, args = self.dec_msg(pkey, data)
+                print(f"TradeEndpoint: got secret from Forge {args}...")
+                if op != 'auth':
+                    raise UnknownError()
+                msg = self.enc_msg(pkey, 'auth', secret=args['secret'])
+                s.sendall(msg)
+
+                # recv
+                payload = self.recvall(s, pkey)
+                op, args = self.dec_msg(pkey, payload)
+                if op == 'error':
+                    if args['code'] == 'InvalidGems':
+                        raise InvalidGemError()
+                    raise UnknownError()
+                self.__emit(TradeEvent.GEMS, peerid='The Forge', gems=args['gems'])
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            raise e
+        finally:
+            self.__remove_connection(trade.peerid)

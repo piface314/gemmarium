@@ -12,7 +12,7 @@ class ProfileEndpoint(Endpoint):
         self.__vault_addr = vault_addr
         self.__vault_key = vault_key
 
-    def signup(self, username: str, key: PublicKey):
+    def signup(self, username: str):
         vault_pkey = self.__vault_key
         with socket.socket() as s:
             s.connect(self.__vault_addr)

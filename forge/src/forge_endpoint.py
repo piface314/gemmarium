@@ -2,8 +2,10 @@ from forge_ctrl import ForgeCtrl
 from nacl.encoding import Base64Encoder
 from nacl.public import PublicKey
 from server import Server, AuthError
+from time import time
 import random
 import socket
+import traceback
 
 
 class ForgeEndpoint(Server):
@@ -40,9 +42,15 @@ class ForgeEndpoint(Server):
         pkey = PublicKey(key, Base64Encoder)
         secret = random.randint(0, 1<<32)
         print(f"Thread@{addr}: my secret is {secret}...")
-        self.send(conn, pkey, "auth", secret=secret)
+        msg = self.enc_msg(pkey, "auth", secret=secret)
+        conn.sendall(msg)
+        print(f"Thread@{addr}: secret bytes {len(msg)} {msg}...")
         payload = conn.recv(1024)
-        op, args = self.dec_msg(pkey, payload)
+        try:
+            op, args = self.dec_msg(pkey, payload)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            raise AuthError()
         print(f"Thread@{addr}: their secret is {args['secret']}...")
         if op != 'auth' or args['secret'] != secret:
             raise AuthError()
@@ -62,5 +70,42 @@ class ForgeEndpoint(Server):
         self.send(conn, pkey, "gem", gem=gem)
         self.ctrl.set_quota(id)
     
-    def handle_fusion(self, conn, addr, _, **args):
-        pass
+    def handle_fusion(self, conn, addr, _, id: str, peerid: str, gems, **args):
+        username, pkey = self.auth(conn, addr, id)
+        print(f"Thread@{addr}: attempting fusion...")
+        try:
+            self.ctrl.update_fusion_request(id, peerid, id, username, gems)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.ctrl.remove_fusion_request(id, peerid)
+            msg = self.enc_msg(pkey, 'error', code='InvalidGems')
+            self.send_size(conn, pkey, msg)
+            conn.sendall(msg)
+            return
+        t0 = time()
+        ok = False
+        print(f"Thread@{addr}: waiting for peer...")
+        try:
+            while time() - t0 <= 60:
+                req = self.ctrl.get_fusion_request(id, peerid)
+                if req.is_complete() and req.has_fusion_set():
+                    print(f"Thread@{addr}: peer connected")
+                    ok = True
+                    break
+        except:
+            pass
+        if not ok:
+            print(f"Thread@{addr}: timeout")
+            msg = self.enc_msg(pkey, 'error', code='Timeout')
+            self.send_size(conn, pkey, msg)
+            conn.sendall(msg)
+            return
+        req = self.ctrl.get_fusion_request(id, peerid)
+        fused, others = req.fusion
+        gems = [fused, *others[id]] if fused else others[id]
+        msg = self.enc_msg(pkey, "gems", gems=gems)
+        self.send_size(conn, pkey, msg)
+        conn.sendall(msg)
+        self.ctrl.remove_fusion_request(id, peerid)
+        
+        

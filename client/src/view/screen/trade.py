@@ -1,3 +1,4 @@
+from logging import warning
 from ctrl.collection import CollectionCtrl
 from ctrl.trade import TradeCtrl, TradeEvent
 from model.gem import Gem
@@ -115,8 +116,12 @@ class TradeScreen(Screen):
         loading = Loading()
         loading.open()
         def cb():
-            ctrl.update(trade, gl)
-            loading.dismiss()
+            try:
+                ctrl.update(trade, gl)
+            except:
+                self.show_warning("Ocorreu um erro durante a troca.")
+            finally:
+                loading.dismiss()
         threading.Thread(target=cb).start()
 
     def handle_accept(self, *args):
@@ -126,9 +131,13 @@ class TradeScreen(Screen):
         loading = Loading()
         loading.open()
         def cb():
-            ctrl.accept(trade)
-            self.trade_copy = trade.copy()
-            loading.dismiss()
+            try:
+                ctrl.accept(trade)
+                self.trade_copy = trade.copy()
+            except:
+                self.show_warning("Ocorreu um erro durante a troca.")
+            finally:
+                loading.dismiss()
         threading.Thread(target=cb).start()
 
     def handle_reject(self, *args):
@@ -138,10 +147,14 @@ class TradeScreen(Screen):
         loading = Loading()
         loading.open()
         def cb():
-            ctrl.reject(trade)
-            self.trade_copy = trade.copy()
-            loading.dismiss()
-            self.receive_close()
+            try:
+                ctrl.reject(trade)
+                self.trade_copy = trade.copy()
+            except:
+                self.show_warning("Ocorreu um erro durante a troca.")
+            finally:
+                loading.dismiss()
+                self.receive_close()
         threading.Thread(target=cb).start()
     
     def handle_fusion(self, *args):
@@ -151,10 +164,19 @@ class TradeScreen(Screen):
         loading = Loading()
         loading.open()
         def cb():
-            ctrl.fuse(trade)
-            self.trade_copy = trade.copy()
-            loading.dismiss()
+            try:
+                ctrl.fuse(trade)
+                self.trade_copy = trade.copy()
+            except:
+                self.show_warning("Ocorreu um erro durante a troca.")
+            finally:
+                loading.dismiss()
         threading.Thread(target=cb).start()
+
+    @mainthread
+    def show_warning(self, msg: str):
+        popup = Warning(msg)
+        popup.open()
     
     @mainthread
     def receive_update(self, trade: Trade):
@@ -168,8 +190,7 @@ class TradeScreen(Screen):
 
     @mainthread
     def receive_error(self, **args):
-        popup = Warning("Ocorreu um erro durante a troca.")
-        popup.open()
+        self.show_warning("Ocorreu um erro durante a troca.")
 
     @mainthread
     def receive_close(self, **args):
