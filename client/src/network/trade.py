@@ -207,7 +207,6 @@ class TradeEndpoint(Endpoint):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 # request
                 s.connect(self.__forge_addr)
-                print(f"TradeEndpoint: sending {[g.name for g in trade.self_gems.offered]} to fuse")
                 gems = [gem.payload for gem in trade.self_gems.offered]
                 msg = self.enc_msg(pkey, "fusion",
                     gems=gems, id=self.__id, peerid=trade.peerid)
@@ -216,11 +215,8 @@ class TradeEndpoint(Endpoint):
                 s.sendall(msg)
                 
                 # auth
-                print(f"TradeEndpoint: waiting secret from Forge...")
                 data = s.recv(1024)
-                print(f"TradeEndpoint: got secret from Forge {len(data)} {data}...")
                 op, args = self.dec_msg(pkey, data)
-                print(f"TradeEndpoint: got secret from Forge {args}...")
                 if op != 'auth':
                     raise UnknownError()
                 msg = self.enc_msg(pkey, 'auth', secret=args['secret'])

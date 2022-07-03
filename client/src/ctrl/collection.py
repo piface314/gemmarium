@@ -66,8 +66,7 @@ class CollectionCtrl:
 
     def request_gem(self):
         uid = self.__id
-        username = self.__username
-        gem_raw = self.__collection_endp.request_gem(uid, username)
+        gem_raw = self.__collection_endp.request_gem(uid)
         gem = self.new_gem(gem_raw)
         self.add_gem(gem)
         return gem

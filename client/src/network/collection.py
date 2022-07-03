@@ -10,7 +10,7 @@ class CollectionEndpoint(Endpoint):
         self.__forge_addr = forge_addr
         self.__forge_key = forge_key
 
-    def request_gem(self, id: str, username: str):
+    def request_gem(self, id: str):
         pkey = self.__forge_key
         with socket.socket() as s:
             # request

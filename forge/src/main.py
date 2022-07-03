@@ -8,7 +8,7 @@ import keys
 
 
 if __name__ == '__main__':
-    forge_port, vault_ip, vault_port, vault_client_port, gem_time = argv[1:6]
+    forge_port, vault_ip, vault_port, gem_time = argv[1:5]
     db = Database()
     ctrl = ForgeCtrl(
         gem_time=int(gem_time),
@@ -24,7 +24,6 @@ if __name__ == '__main__':
         vault_pkey=PublicKey(keys.vault_pkey),
         ctrl=ctrl
     )
-    endp.connect_vault(int(vault_client_port))
     endp.listen()
 
     

@@ -17,26 +17,19 @@ class ForgeEndpoint(Server):
         self.vault_addr = vault_addr
         self.vault_pkey = vault_pkey
 
-    def connect_vault(self, port):
-        self.vault_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.vault_socket.bind((self.addr[0], port))
-        self.vault_socket.connect(self.vault_addr)
-
-    def close(self):
-        print("Closing socket with Vault")
-        self.vault_socket.close()
-
     def auth(self, conn, addr, id: str):
         print(f"Thread@{addr}: authenticating...")
-        vault_s = self.vault_socket
-        msg = self.enc_msg(self.vault_pkey, "auth", id=id)
-        self.send_size(vault_s, self.vault_pkey, msg)
-        vault_s.sendall(msg)
-        payload = vault_s.recv(1024)
-        op, args = self.dec_msg(self.vault_pkey, payload)
-        if op == 'error':
-            raise AuthError()
-        name, key = args['name'], args['key']
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect(self.vault_addr)
+            msg = self.enc_msg(self.vault_pkey, "auth", id=id)
+            self.send_key(s, self.vault_pkey)
+            self.send_size(s, self.vault_pkey, msg)
+            s.sendall(msg)
+            payload = s.recv(1024)
+            op, args = self.dec_msg(self.vault_pkey, payload)
+            if op == 'error':
+                raise AuthError()
+            name, key = args['name'], args['key']
 
         print(f"Thread@{addr}: found {name} with key {key}...")
         pkey = PublicKey(key, Base64Encoder)
@@ -44,7 +37,6 @@ class ForgeEndpoint(Server):
         print(f"Thread@{addr}: my secret is {secret}...")
         msg = self.enc_msg(pkey, "auth", secret=secret)
         conn.sendall(msg)
-        print(f"Thread@{addr}: secret bytes {len(msg)} {msg}...")
         payload = conn.recv(1024)
         try:
             op, args = self.dec_msg(pkey, payload)

@@ -21,16 +21,6 @@ class Server:
     def __init__(self, private_key: PrivateKey, public_key: PublicKey):
         self.__private_key = private_key
         self.__public_key = public_key
-        self.__trusted_hosts = {}
-
-    def trust_host(self, addr, pkey):
-        self.__trusted_hosts[addr] = pkey
-
-    def get_key(self, addr):
-        return self.__trusted_hosts.get(addr, None)
-
-    def close(self):
-        pass
     
     def enc_msg(self, pkey: PublicKey, op: str, **args):
         payload = json.dumps([op, args]).encode('utf-8')
@@ -41,15 +31,17 @@ class Server:
         box = Box(self.__private_key, pkey)
         return json.loads(box.decrypt(payload))
 
-    def recv_key(self, conn, addr, keep: bool):
-        if keep:
-            return self.get_key(addr)
+    def recv_key(self, conn):
         try:
             box = SealedBox(self.__private_key)
             payload = box.decrypt(conn.recv(80))
             return PublicKey(payload)
         except:
             raise PublicKeyError()
+
+    def send_key(self, conn, pkey: PublicKey):
+        box = SealedBox(pkey)
+        conn.sendall(box.encrypt(self.__public_key.encode()))
     
     def recv_size(self, conn, pkey: PublicKey):
         box = Box(self.__private_key, pkey)
@@ -79,30 +71,23 @@ class Server:
                 while True:
                     print("Listening...")
                     conn, addr = s.accept()
-                    # conn.settimeout(5)
-                    keep = addr in self.__trusted_hosts
                     worker = threading.Thread(
                         target=self.handle,
-                        args=(conn, addr, keep)
+                        args=(conn, addr)
                     )
                     worker.start()
         finally:
             s.close()
-            self.close()
 
-    def handle(self, conn, addr, keep):
+    def handle(self, conn, addr):
         print(f"Thread@{addr}: connected")
         try:
             try:
-                pkey = self.recv_key(conn, addr, keep)
-                run = True
-                while run:
-                    if not keep:
-                        run = False
-                    payload = self.recv_all(conn, pkey)
-                    op, args = self.dec_msg(pkey, payload)
-                    handler = self.__getattribute__("handle_" + op)
-                    handler(conn, addr, pkey, **args)
+                pkey = self.recv_key(conn)
+                payload = self.recvall(conn, pkey)
+                op, args = self.dec_msg(pkey, payload)
+                handler = self.__getattribute__("handle_" + op)
+                handler(conn, addr, pkey, **args)
             except AttributeError:
                 conn.sendall(self.enc_msg(pkey, "error", code="UnknownOperation"))
             except AuthError:
