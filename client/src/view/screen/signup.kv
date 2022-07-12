@@ -1,13 +1,20 @@
 #:import Sprite view.component.sprite.Sprite
+#:import sheet view.component.sprite.get_file_sheet
+#:import anim view.component.sprite.get_animation
 #:import rects view.component.sprite.logo_rects
 
 <SignupScreen>:
-    logo: Sprite.from_file('res/logo.png', rects)
     BoxLayout:
         id: box_layout
         orientation: 'vertical'
         padding: '20sp'
         spacing: '20sp'
+        Sprite:
+            allow_stretch: True
+            sheet: sheet('res/logo.png', rects)
+            frame: 0
+            animation: anim(len(rects))
+            animate: True
         TextInput:
             id: text_input
             hint_text: 'Nome de usuário...'

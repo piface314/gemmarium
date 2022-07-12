@@ -41,21 +41,7 @@ class ClientApp(App):
     def build(self):
         self.icon = 'res/icon.png'
         self.title = 'Gemmarium'
-
-        sm = ScreenManager(transition=CardTransition())
-        if not self.profile_ctrl.is_logged_in():
-            sm.add_widget(SignupScreen(name='signup'))
-        sm.add_widget(MenuScreen(name='menu'))
-        sm.add_widget(CollectionScreen(name='collection'))
-        sm.add_widget(OfferedScreen(name='offered'))
-        sm.add_widget(WantedScreen(name='wanted'))
-        sm.add_widget(RequestScreen(name='request'))
-        sm.add_widget(SearchScreen(name='search'))
-        sm.add_widget(TradeListScreen(name='trade_list'))
-        sm.add_widget(TradeScreen(name='trade'))
-        return sm
-    
-    def on_start(self):
+        
         self.trade_ctrl.bind(TradeEvent.GEMS, self.show_gems)
         self.load_textures('base')
         self.load_textures('buttons', [
@@ -70,6 +56,19 @@ class ClientApp(App):
             ('fusion', 32, 0, 16, 16),
             ('add', 48, 0, 16, 16),
         ])
+
+        sm = ScreenManager(transition=CardTransition())
+        if not self.profile_ctrl.is_logged_in():
+            sm.add_widget(SignupScreen(name='signup'))
+        sm.add_widget(MenuScreen(name='menu'))
+        sm.add_widget(CollectionScreen(name='collection'))
+        sm.add_widget(OfferedScreen(name='offered'))
+        sm.add_widget(WantedScreen(name='wanted'))
+        sm.add_widget(RequestScreen(name='request'))
+        sm.add_widget(SearchScreen(name='search'))
+        sm.add_widget(TradeListScreen(name='trade_list'))
+        sm.add_widget(TradeScreen(name='trade'))
+        return sm
     
     @mainthread
     def show_gems(self, sender, gems):

@@ -84,18 +84,13 @@ class RequestScreen(Screen):
         if not val:
             return
         self.msg = f'Você ganhou: {val.name}!'
-        gem = Sprite.from_bytes(
-            val.sprite,
-            gem_rects,
-            f'{val.id}.png'
-        )
+        gem = Sprite.from_gem(val)
         gem.animate = True
         gem.allow_stretch = True
         gem.size_hint = (0.5, 0.5)
         gem.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         app = App.get_running_app()
         holder = GemHolder(highlight=False)
-        holder.ids['base'].texture = app.get_texture('base')
         holder.size_hint = (0.6, 0.6)
         holder.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         holder.add_widget(gem)

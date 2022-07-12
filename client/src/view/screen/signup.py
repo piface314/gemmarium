@@ -12,15 +12,6 @@ Builder.load_file('src/view/screen/signup.kv')
 
 
 class SignupScreen(Screen):
-
-    logo = ObjectProperty(None)
-
-    def on_logo(self, _, logo):
-        box_layout = self.ids['box_layout']
-        logo.animate = True
-        logo.size_hint = (1, 1)
-        logo.allow_stretch = True
-        box_layout.add_widget(logo, len(box_layout.children))
         
     @mainthread
     def goto_menu(self):

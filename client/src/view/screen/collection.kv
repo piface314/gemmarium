@@ -9,6 +9,8 @@
             title: "Coleção"
             bgcolor: (.2, .2, .2, 1)
             size_hint: None, None
+            lt_btn: [app.get_back_button()]
+            rt_btn: [(root.goto_wanted, app.get_texture('buttons-edit_wanted')), (root.goto_offered, app.get_texture('buttons-edit_offered'))]
         ScrollView:
             do_scroll_x: False
             do_scroll_y: True

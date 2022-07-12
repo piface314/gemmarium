@@ -68,11 +68,7 @@ class TradeScreen(Screen):
         sw.strs = trade.self_gems.wanted
     
     def gem_icon(self, gem: Gem):
-        gem_sp = Sprite.from_bytes(
-            gem.sprite,
-            gem_rects,
-            f'{gem.id}.png'
-        )
+        gem_sp = Sprite.from_gem(gem)
         gem_sp.animate = False
         gem_sp.allow_stretch = True
         return gem_sp
