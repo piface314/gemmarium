@@ -1,34 +1,48 @@
 from auth_ctrl import AuthCtrl
 from nacl.public import PublicKey
-from server import Server
+from rmi.vault_pb2_grpc import AuthServicer
+from rmi.vault_pb2 import SignupResponse, AuthResponse
 
-class AuthEndpoint(Server):
 
-    def __init__(self, port, private_key, public_key, ctrl: AuthCtrl):
-        super().__init__(private_key, public_key)
+class AuthEndpoint(AuthServicer):
+
+    def __init__(self, port, ctrl: AuthCtrl):
         self.addr = ("", port)
         self.ctrl = ctrl
 
-    def handle_signup(self, conn, addr, pkey: PublicKey, username: str, **args):
-        print(f"Thread@{addr}: signing up...")
+    def signup(self, request, context):
+        print(f"signup({str(request).strip()})")
+        username = request.username
+        pkey = request.key
         if not self.ctrl.is_username_valid(username):
-            print(f"Thread@{addr}: invalid name")
-            self.send(conn, pkey, "error", code="InvalidUsername")
-            return
-        u = self.ctrl.add_user(username, pkey.encode())
+            return SignupResponse(error="InvalidUsername")
+        u = self.ctrl.add_user(username, pkey)
         if u is None:
-            print(f"Thread@{addr}: username taken")
-            self.send(conn, pkey, "error", code="UsernameTaken")
-            return
-        print(f"Thread@{addr}: signed up")
-        conn.sendall(self.enc_msg(pkey, "ack", id=u.id))
-        self.send(conn, pkey, "ack", id=u.id)
-          
-    def handle_auth(self, conn, addr, pkey: PublicKey, id: str, **args):
-        print(f"Thread@{addr}: finding user...")
-        u = self.ctrl.get_user(id)
+            return SignupResponse(error="UsernameTaken")
+        return SignupResponse(id=u.id)
+        
+    def auth(self, request_iterator, context):
+        print(context)
+        req = next(request_iterator)
+        print(f'auth({str(req).strip()})')
+        u = self.ctrl.get_user(req.id)
         if not u:
-            print(f"Thread@{addr}: user not found")
-            self.send(conn, pkey, "error", code="UserNotFound")
-        print(f"Thread@{addr}: found user {u}")
-        self.send(conn, pkey, "user", name=u.username, key=u.public_key)
+            print(f'error: user not found')
+            yield AuthResponse(error="UserNotFound")
+            return
+        pkey = PublicKey(u.public_key)
+        ref, secret = self.ctrl.get_secret(pkey)
+        print(f"sending secret...")
+        yield AuthResponse(secret=secret)
+        req = next(request_iterator)
+        print(f'auth({str(req).strip()})')
+        if not self.ctrl.chk_secret(ref, req.secret, pkey):
+            print(f'error: auth error')
+            yield AuthResponse(error="AuthError")
+            return
+        token = self.ctrl.get_token(u)
+        yield AuthResponse(token=token)
+
+
+        
+    
