@@ -12,13 +12,13 @@ import grpc
 
 
 if __name__ == '__main__':
-    vault_port = argv[1]
+    port = argv[1]
     db = Database()
-    auth_ctrl = AuthCtrl(db, keys.auth_key, PrivateKey(keys.vault_skey))
-    auth_endp = AuthEndpoint(int(vault_port), auth_ctrl)
+    ctrl = AuthCtrl(db, keys.auth_key, PrivateKey(keys.vault_skey))
+    endp = AuthEndpoint(ctrl)
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    add_AuthServicer_to_server(auth_endp, server)
-    server.add_insecure_port(f'[::]:{vault_port}')
+    add_AuthServicer_to_server(endp, server)
+    server.add_insecure_port(f'[::]:{port}')
     print(f"Vault started!")
     server.start()
     server.wait_for_termination()

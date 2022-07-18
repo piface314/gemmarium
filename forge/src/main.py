@@ -1,29 +1,31 @@
 from database import Database
 from forge_ctrl import ForgeCtrl
 from forge_endpoint import ForgeEndpoint
-from nacl.public import PrivateKey, PublicKey
 from nacl.signing import SigningKey, VerifyKey
 from sys import argv
 import keys
 
+from concurrent.futures import ThreadPoolExecutor
+from rmi.forge_pb2_grpc import add_ForgeServicer_to_server
+import grpc
+
 
 if __name__ == '__main__':
-    forge_port, vault_ip, vault_port, gem_time = argv[1:5]
+    port, gem_time = argv[1:5]
     db = Database()
     ctrl = ForgeCtrl(
-        gem_time=int(gem_time),
         db=db,
+        gem_time=int(gem_time),
         sign_key=SigningKey(keys.forge_sign_key),
-        verify_key=VerifyKey(keys.forge_vkey)
+        verify_key=VerifyKey(keys.forge_vkey),
+        auth_key=keys.auth_key
     )
-    endp = ForgeEndpoint(
-        port=int(forge_port),
-        private_key=PrivateKey(keys.forge_skey),
-        public_key=PublicKey(keys.forge_pkey),
-        vault_addr=(vault_ip, int(vault_port)),
-        vault_pkey=PublicKey(keys.vault_pkey),
-        ctrl=ctrl
-    )
-    endp.listen()
+    endp = ForgeEndpoint(ctrl)
+    server = grpc.server(ThreadPoolExecutor(max_workers=10))
+    add_ForgeServicer_to_server(endp, server)
+    server.add_insecure_port(f'[::]:{port}')
+    print(f"Forge started!")
+    server.start()
+    server.wait_for_termination()
 
     

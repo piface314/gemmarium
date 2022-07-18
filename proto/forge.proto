@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+// Provides system content, i.e., gem data
+service Forge {
+    // Generates a random gem for a user
+    rpc gem (GemRequest) returns (GemResponse) {}
+
+    // Attempts to fuse the gems being traded by two users.
+    rpc fuse (FusionRequest) returns (FusionResponse) {}
+}
+
+message GemRequest {
+    bytes token = 1;
+}
+
+message GemResponse {
+    bytes gem = 1;
+    string error = 2;
+    uint32 wait = 3;
+}
+
+message FusionRequest {
+    bytes token = 1;
+    string peerid = 2;
+    repeated bytes gems = 3;
+}
+
+message FusionResponse {
+    repeated bytes gems = 1;
+    string error = 3;
+}

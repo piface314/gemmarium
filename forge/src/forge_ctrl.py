@@ -1,7 +1,6 @@
 from database import Database
 from datetime import datetime
-from nacl.encoding import Base64Encoder
-from nacl.exceptions import BadSignatureError
+from nacl.secret import SecretBox
 from nacl.signing import SigningKey, VerifyKey
 from random import choices, choice
 import base64
@@ -26,19 +25,25 @@ class FusionRequest:
     
     def get_gems(self, vkey: VerifyKey):
         # return self.gems_a, self.gems_b
-        gems_a = [json.loads(vkey.verify(raw, encoder=Base64Encoder)) for raw in self.gems_a]
-        gems_b = [json.loads(vkey.verify(raw, encoder=Base64Encoder)) for raw in self.gems_b]
+        gems_a = [json.loads(vkey.verify(raw)) for raw in self.gems_a]
+        gems_b = [json.loads(vkey.verify(raw)) for raw in self.gems_b]
         return gems_a, gems_b
 
 
 class ForgeCtrl:
 
-    def __init__(self, gem_time: int, db: Database, sign_key: SigningKey, verify_key: VerifyKey):
+    def __init__(self,
+            db: Database,
+            gem_time: int,
+            sign_key: SigningKey,
+            verify_key: VerifyKey,
+            auth_key: bytes):
         self.db = db
         self.gem_time = gem_time
         self.sign_key = sign_key
         self.verify_key = verify_key
         self.fusion_requests = {}
+        self.box = SecretBox(auth_key)
         self.__load_gems()
         self.__lock = threading.Lock()
 
@@ -51,6 +56,16 @@ class ForgeCtrl:
         for gem_id, gem_data in self.gems.items():
             self.gem_list.append(gem_id)
             self.gem_rarity.append(gem_data['rarity'])
+    
+    def auth(self, token: bytes):
+        try:
+            token = json.loads(self.box.decrypt(token))
+            expire = datetime.fromisoformat(token['expire'])
+            if datetime.now() >= expire:
+                return None, None
+            return token['id'], token['username']
+        except:
+            return None, None
 
     def check_quota(self, uid):
         q = self.db.get_quota(uid)
@@ -82,12 +97,10 @@ class ForgeCtrl:
     
     def sign_gem(self, gem):
         gem_json = json.dumps(gem).encode('utf-8')
-        signed_gem = self.sign_key.sign(gem_json, Base64Encoder)
-        return signed_gem.decode('utf-8')
+        return self.sign_key.sign(gem_json)
 
     def choose_gem(self, username):
         gem_id = choices(self.gem_list, weights=self.gem_rarity, k=1)[0]
-        print(f"Thread@{username}: chose gem {gem_id}")
         gem = self.create_gem(gem_id, username)
         return self.sign_gem(gem)
 

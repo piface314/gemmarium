@@ -2,10 +2,10 @@ syntax = "proto3";
 
 // Provides system signup and authentication
 service Auth {
-    // 
+    // Registers a user in the system
     rpc signup(SignupRequest) returns (SignupResponse) {}
 
-    // 
+    // Requests an authentication token
     rpc auth(stream AuthRequest) returns (stream AuthResponse) {}
 }
 
