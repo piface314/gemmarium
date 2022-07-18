@@ -46,5 +46,5 @@ def request_signup(username):
     print(res)
 
 
-# request_auth('322d85b6-2188-4494-aba1-be9519c5f729')
-request_signup('bob')
+request_auth('322d85b6-2188-4494-aba1-be9519c5f729')
+# request_signup('bob')

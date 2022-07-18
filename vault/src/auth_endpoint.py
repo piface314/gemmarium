@@ -32,10 +32,10 @@ class AuthEndpoint(AuthServicer):
         print(f"{context.peer()}: sending secret...")
         yield AuthResponse(secret=secret)
         req = next(request_iterator)
-        print(f'{context.peer()}: auth({str(req).strip()})')
         if not self.ctrl.chk_secret(ref, req.secret, pkey):
             yield AuthResponse(error="AuthError")
             return
+        print(f"{context.peer()}: sending token...")
         token = self.ctrl.get_token(u)
         yield AuthResponse(token=token)
 

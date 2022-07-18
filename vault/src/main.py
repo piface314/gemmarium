@@ -1,7 +1,8 @@
 from auth_ctrl import AuthCtrl
 from auth_endpoint import AuthEndpoint
 from database import Database
-from nacl.public import PrivateKey, PublicKey
+from nacl.public import PrivateKey
+from nacl.signing import SigningKey
 from sys import argv
 import keys
 
@@ -14,7 +15,7 @@ import grpc
 if __name__ == '__main__':
     port = argv[1]
     db = Database()
-    ctrl = AuthCtrl(db, keys.auth_key, PrivateKey(keys.vault_skey))
+    ctrl = AuthCtrl(db, SigningKey(keys.vault_sign_key), PrivateKey(keys.vault_skey))
     endp = AuthEndpoint(ctrl)
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
     add_AuthServicer_to_server(endp, server)

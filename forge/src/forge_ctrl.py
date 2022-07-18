@@ -1,6 +1,5 @@
 from database import Database
 from datetime import datetime
-from nacl.secret import SecretBox
 from nacl.signing import SigningKey, VerifyKey
 from random import choices, choice
 import base64
@@ -37,13 +36,13 @@ class ForgeCtrl:
             gem_time: int,
             sign_key: SigningKey,
             verify_key: VerifyKey,
-            auth_key: bytes):
+            vault_vkey: VerifyKey):
         self.db = db
         self.gem_time = gem_time
         self.sign_key = sign_key
         self.verify_key = verify_key
+        self.vault_vkey = vault_vkey
         self.fusion_requests = {}
-        self.box = SecretBox(auth_key)
         self.__load_gems()
         self.__lock = threading.Lock()
 
@@ -59,7 +58,7 @@ class ForgeCtrl:
     
     def auth(self, token: bytes):
         try:
-            token = json.loads(self.box.decrypt(token))
+            token = json.loads(self.vault_vkey.verify(token))
             expire = datetime.fromisoformat(token['expire'])
             if datetime.now() >= expire:
                 return None, None

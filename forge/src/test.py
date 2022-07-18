@@ -90,9 +90,9 @@ def find_fusion():
     print(ctrl.fuse(req))
     
 
-# request_gem('3b089561-0033-4b79-b691-1f0842898e7a')
 # find_fusion()
 alice = '322d85b6-2188-4494-aba1-be9519c5f729'
 bob = '3b089561-0033-4b79-b691-1f0842898e7a'
+# request_gem(alice)
 threading.Thread(target=request_fusion, args=(alice, bob)).start()
 threading.Thread(target=request_fusion, args=(bob, alice)).start()

@@ -18,7 +18,7 @@ if __name__ == '__main__':
         gem_time=int(gem_time),
         sign_key=SigningKey(keys.forge_sign_key),
         verify_key=VerifyKey(keys.forge_vkey),
-        auth_key=keys.auth_key
+        vault_vkey=VerifyKey(keys.vault_vkey)
     )
     endp = ForgeEndpoint(ctrl)
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
