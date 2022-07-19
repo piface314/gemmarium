@@ -30,7 +30,8 @@ message TradeEvent {
 }
 
 message TradeGems {
-    repeated bytes gems = 1;
+    string sender = 1;
+    repeated bytes gems = 2;
 }
 
 message TradeResponse {

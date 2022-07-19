@@ -31,21 +31,23 @@ id2 = str(uuid.uuid4())
 skey2 = PrivateKey.generate()
 pkey2 = skey2.public_key
 
-alice_gallery = GemList(['Ruby', 'Sapphire'], gems_a)
-bob_gallery = GemList(['Pearl', 'Rose Quartz'], gems_b)
+alice_gallery = GemList(['Ruby', 'Sapphire'],   [g[0] for g in gems_a])
+bob_gallery = GemList(['Pearl', 'Rose Quartz'], [g[0] for g in gems_b])
 
 def local_search():
     if argv[1] == '1':
-        endp = SearchEndpoint(7515, 7516, None, None, 5)
+        endp = SearchEndpoint(7515, None, offset=5)
         endp.set_identity(id1, 'alice')
         endp.set_keys(skey, pkey)
+        endp.set_trade_port(7555)
         endp.sync_gallery(alice_gallery)
         results = endp.local_search()
         print(results)
     else:
-        endp = SearchEndpoint(7520, 7521, None, None, -5)
+        endp = SearchEndpoint(7520, None, offset=-5)
         endp.set_identity(id2, 'bob')
         endp.set_keys(skey2, pkey2)
+        endp.set_trade_port(7588)
         endp.sync_gallery(bob_gallery)
         endp.listen()
 
@@ -102,4 +104,4 @@ def trade():
     threading.Thread(target=t1).start()
 
 
-trade()
+local_search()

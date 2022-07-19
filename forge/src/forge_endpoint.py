@@ -54,5 +54,6 @@ class ForgeEndpoint(ForgeServicer):
         req = self.ctrl.get_fusion_request(uid, peerid)
         fused, others = req.fusion
         gems = [fused, *others[uid]] if fused else others[uid]
+        self.ctrl.remove_fusion_request(uid, peerid, uid)
         return FusionResponse(gems=gems)
         

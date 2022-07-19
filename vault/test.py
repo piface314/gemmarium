@@ -39,7 +39,7 @@ def request_auth(uid):
     print(res[1])
 
 def request_signup(username):
-    channel = grpc.insecure_channel('localhost:7513')
+    channel = grpc.insecure_channel('ipv6:[::1]:7513')
     stub = AuthStub(channel)
     req = SignupRequest(username=username, key=pkey.encode())
     res = stub.signup(req)

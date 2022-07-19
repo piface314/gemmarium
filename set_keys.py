@@ -20,6 +20,5 @@ with open("forge/src/keys.py", "w") as f:
 
 with open("client/src/keys.py", "w") as f:
     f.write(f'vault_pkey = {vault_pkey}\n')
-    f.write(f'vault_vkey = {vault_vkey}\n')
     f.write(f'forge_vkey = {forge_vkey}\n')
 

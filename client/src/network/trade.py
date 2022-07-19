@@ -1,15 +1,18 @@
 from enum import Enum
-from model.gem import Gem
 from model.misc import GemList
 from model.trade import Trade
-from nacl.public import PublicKey
-from nacl.encoding import Base64Encoder
 from network.endpoint import Endpoint
-from network.search import SearchEndpoint
-from exceptions import UnknownError, InvalidGemError
-import socket
-import threading
+from network.profile import ProfileEndpoint
+from exceptions import UnknownError, InvalidGemError, FusionTimeout
+import re
 import traceback
+
+import grpc
+from rmi.client_pb2_grpc import TradeServicer, TradeStub
+from rmi.client_pb2 import TradeEvent as TradeEventMsg
+from rmi.client_pb2 import TradeGems, TradeResponse
+from rmi.forge_pb2 import FusionRequest
+from rmi.forge_pb2_grpc import ForgeStub
 
 
 class TradeEvent(Enum):
@@ -23,215 +26,202 @@ class TradeEvent(Enum):
     ERROR = 7
     CLOSE = 8
 
-class BadTradeStart(Exception):
+class BadTradeStart(Exception): pass
+class TradeNotStarted(Exception): pass
 
-    pass
+class TradeEndpoint(TradeServicer, Endpoint):
 
-class TradeNotStarted(Exception):
+    @staticmethod
+    def grpc_ip(addr: str):
+        m = re.match(r'(.*):\d+$', addr)
+        return m.group(1) if m else None
 
-    pass
-
-class TradeEndpoint(Endpoint):
-
-    def __init__(self, search_endp: SearchEndpoint, forge_addr, forge_key: PublicKey):
-        self.__search_endp = search_endp
+    def __init__(self, forge_addr, profile_endp: ProfileEndpoint):
         self.__port = 0
-        self.__forge_addr = forge_addr
-        self.__forge_key = forge_key
+        self.__forge_addr = f'{forge_addr[0]}:{forge_addr[1]}'
         self.__listeners = {ev: [] for ev in TradeEvent}
         self.__connections = {}
-    
-    def set_identity(self, id: str, username: str):
-        self.__id = id
-        self.__username = username
+        self.profile_endp = profile_endp
+
+    def set_port(self, port: int):
+        self.__port = port
     
     def bind(self, ev: TradeEvent, cb):
         self.__listeners[ev].append(cb)
+
+    def __emit(self, ev: TradeEvent, **kwargs):
+        for cb in self.__listeners[ev]:
+            cb(**kwargs)
+        
+    def __error(self, peerid: str):
+        self.__emit(TradeEvent.ERROR, peerid=peerid)
+        self.remove_connection(peerid)
     
     def get_connection(self, peerid: str):
         try:
             return self.__connections[peerid]
         except:
             raise TradeNotStarted()
+        
+    def add_connection(self, peerid, conn):
+        self.__connections[peerid] = conn
     
-    def __remove_connection(self, peerid: str):
-        conn = self.__connections.pop(peerid, None)
-        if conn:
-            conn.close()
+    def remove_connection(self, peerid: str):
+        self.__connections.pop(peerid, None)
+        self.__emit(TradeEvent.CLOSE, peerid=peerid)
 
-    def listen(self):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", 0))
-            self.__port = s.getsockname()[1]
-            self.__search_endp.set_trade_port(self.__port)
-            s.listen()
-            while True:
-                print(f"TradeEndpoint: Listening on port {self.__port}...")
-                conn, addr = s.accept()
-                worker = threading.Thread(
-                    target=self.handle,
-                    args=(conn, addr),
-                    daemon=True
-                )
-                worker.start()
-    
-    def handle(self, conn: socket.socket, addr):
-        print(f"TradeEndpoint@{addr}: connected")
-        peerid = None
+    def send_trade(self, trade: Trade):
         try:
-            pkey = self.recv_key(conn)
-            while True:
-                print(f"TradeEndpoint@{addr}: waiting for msg")
-                payload = self.recvall(conn, pkey)
-                op, args = self.dec_msg(pkey, payload)
-                if peerid is None:
-                    if op != 'trade':
-                        raise BadTradeStart()
-                    print(f"TradeEndpoint@{addr}: trade start")
-                    for cb in self.__listeners[TradeEvent.TRADE]:
-                        cb(ip=addr[0], key=pkey, **args)
-                    peerid = args['peerid']
-                    self.__send_ack(conn, pkey)
-                    continue
-                ev = TradeEvent[op.upper()]
-                print(f"TradeEndpoint@{addr}: {ev}")
-                for cb in self.__listeners[ev]:
-                    cb(peerid=peerid,**args)
-                self.__send_ack(conn, pkey)
-                if ev == TradeEvent.REJECT:
-                    self.__remove_connection(peerid)
-                    break
-        except BrokenPipeError:
-            pass
-        except BadTradeStart:
-            conn.sendall(self.enc_msg(pkey, "error", code="BadTradeStart"))
-            self.__emit(TradeEvent.ERROR, peerid=peerid)
+            channel = grpc.insecure_channel(f'{trade.ip}:{trade.port}')
+            stub = TradeStub(channel)
+            req = TradeEventMsg(peerid=self.uid, peername=self.username, port=self.__port)
+            res = stub.trade(req)
+            if not res.ack:
+                raise BadTradeStart()
+            self.add_connection(trade.peerid, stub)
         except Exception as e:
             traceback.print_exception(type(e), e, e.__traceback__)
-            conn.sendall(self.enc_msg(pkey, "error", code="UnknownError"))
-            self.__emit(TradeEvent.ERROR, peerid=peerid)
-        finally:
-            print(f"TradeEndpoint@{addr}: disconnected")
-            self.__emit(TradeEvent.CLOSE, peerid=peerid)
-            conn.close()
-
-    def __emit(self, ev: TradeEvent, **args):
-        for cb in self.__listeners[ev]:
-            cb(**args)
-
-    def start(self, trade: Trade):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((trade.ip, trade.port))
-            peerid = self.__id
-            peername = self.__username
-            port = self.__port
-            msg = self.enc_msg(trade.key, "trade", peerid=peerid, peername=peername, port=port)
-            self.send_key(s, trade.key)
-            self.send_size(s, trade.key, msg)
-            s.sendall(msg)
-            self.__ack(s, trade.key)
-            self.__connections[trade.peerid] = s
-        except Exception as e:
-            self.__remove_connection(trade.peerid)
+            self.remove_connection(trade.peerid)
             raise e
 
-    def update(self, trade: Trade, gems: GemList):
+    def send_update(self, trade: Trade, gems: GemList):
         try:
             wanted = list(gems.wanted)
             offered = list(gems.offered)
-            s: socket.socket = self.get_connection(trade.peerid)
-            msg = self.enc_msg(trade.key, "update", wanted=wanted, offered=offered)
-            self.send_size(s, trade.key, msg)
-            s.sendall(msg)
-            self.__ack(s, trade.key)
+            stub = self.get_connection(trade.peerid)
+            req = TradeEventMsg(peerid=self.uid, wanted=wanted, offered=offered)
+            res = stub.update(req)
+            if not res.ack:
+                raise UnknownError()
         except Exception as e:
-            self.__remove_connection(trade.peerid)
+            self.remove_connection(trade.peerid)
             raise e
 
-    def accept(self, trade: Trade):
+    def send_accept(self, trade: Trade):
         try:
-            s: socket.socket = self.get_connection(trade.peerid)
-            msg = self.enc_msg(trade.key, "accept")
-            self.send_size(s, trade.key, msg)
-            s.sendall(msg)
-            self.__ack(s, trade.key)
+            stub = self.get_connection(trade.peerid)
+            req = TradeEventMsg(peerid=self.uid)
+            res = stub.accept(req)
+            if not res.ack:
+                raise UnknownError()
         except Exception as e:
-            self.__remove_connection(trade.peerid)
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.remove_connection(trade.peerid)
             raise e
 
-    def reject(self, trade: Trade):
+    def send_reject(self, trade: Trade):
         try:
-            s: socket.socket = self.get_connection(trade.peerid)
-            msg = self.enc_msg(trade.key, "reject")
-            self.send_size(s, trade.key, msg)
-            s.sendall(msg)
-            self.__ack(s, trade.key)
-            self.__remove_connection(trade.peerid)
+            stub = self.get_connection(trade.peerid)
+            req = TradeEventMsg(peerid=self.uid)
+            res = stub.reject(req)
+            if not res.ack:
+                raise UnknownError()
+            self.remove_connection(trade.peerid)
         except Exception as e:
-            self.__remove_connection(trade.peerid)
+            self.remove_connection(trade.peerid)
             raise e
-    
+
+    def send_fuse(self, trade: Trade):
+        try:
+            stub = self.get_connection(trade.peerid)
+            req = TradeEventMsg(peerid=self.uid)
+            res = stub.fuse(req)
+            if not res.ack:
+                raise UnknownError()
+        except Exception as e:
+            self.remove_connection(trade.peerid)
+            raise e
+
     def send_gems(self, trade: Trade):
         try:
-            s: socket.socket = self.get_connection(trade.peerid)
+            stub = self.get_connection(trade.peerid)
             gems = [gem.payload for gem in trade.self_gems.offered]
-            msg = self.enc_msg(trade.key, "gems", gems=gems)
-            self.send_size(s, trade.key, msg)
-            s.sendall(msg)
-            self.__ack(s, trade.key)
-            self.__remove_connection(trade.peerid)
+            req = TradeGems(sender=self.username, gems=gems)
+            res = stub.gems(req)
+            if not res.ack:
+                raise UnknownError()
+            self.remove_connection(trade.peerid)
         except Exception as e:
-            self.__remove_connection(trade.peerid)
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.remove_connection(trade.peerid)
             raise e
-    
-    def __send_ack(self, conn, pkey: PublicKey):
-        conn.sendall(self.enc_msg(pkey, "ack"))
 
-    def __ack(self, conn, pkey: PublicKey):
-        data = conn.recv(1024)
-        op, args = self.dec_msg(pkey, data)
-        if op != 'ack':
-            raise UnknownError(args)
-
-    def fuse(self, trade: Trade):
-        s: socket.socket = self.get_connection(trade.peerid)
-        msg = self.enc_msg(trade.key, "fusion")
-        self.send_size(s, trade.key, msg)
-        s.sendall(msg)
-        self.__ack(s, trade.key)
-
-    def fuse_to_forge(self, trade: Trade):
-        pkey = self.__forge_key
+    def trade(self, request, context):
         try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                # request
-                s.connect(self.__forge_addr)
-                gems = [gem.payload for gem in trade.self_gems.offered]
-                msg = self.enc_msg(pkey, "fusion",
-                    gems=gems, id=self.__id, peerid=trade.peerid)
-                self.send_key(s, pkey)
-                self.send_size(s, pkey, msg)
-                s.sendall(msg)
-                
-                # auth
-                data = s.recv(1024)
-                op, args = self.dec_msg(pkey, data)
-                if op != 'auth':
-                    raise UnknownError()
-                msg = self.enc_msg(pkey, 'auth', secret=args['secret'])
-                s.sendall(msg)
+            ip = self.grpc_ip(context.peer())
+            self.__emit(TradeEvent.TRADE, peerid=request.peerid, peername=request.peername,
+                    ip=ip, port=request.port, key=None)
+            return TradeResponse(ack=True)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.__error(request.peerid)
+            return TradeResponse(ack=False)
 
-                # recv
-                payload = self.recvall(s, pkey)
-                op, args = self.dec_msg(pkey, payload)
-                if op == 'error':
-                    if args['code'] == 'InvalidGems':
-                        raise InvalidGemError()
-                    raise UnknownError()
-                self.__emit(TradeEvent.GEMS, peerid='The Forge', gems=args['gems'])
+    def update(self, request, context):
+        try:
+            self.__emit(TradeEvent.UPDATE, peerid=request.peerid,
+                wanted=request.wanted, offered=request.offered)
+            return TradeResponse(ack=True)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.__error(request.peerid)
+            return TradeResponse(ack=False)
+
+    def accept(self, request, context):
+        try:
+            self.__emit(TradeEvent.ACCEPT, peerid=request.peerid)
+            return TradeResponse(ack=True)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.__error(request.peerid)
+            return TradeResponse(ack=False)
+
+    def reject(self, request, context):
+        try:
+            self.__emit(TradeEvent.REJECT, peerid=request.peerid)
+            return TradeResponse(ack=True)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.__error(request.peerid)
+            return TradeResponse(ack=False)
+        finally:
+            self.remove_connection(request.peerid)
+
+    def fuse(self, request, context):
+        try:
+            self.__emit(TradeEvent.FUSION, peerid=request.peerid)
+            return TradeResponse(ack=True)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.__error(request.peerid)
+            return TradeResponse(ack=False)
+
+    def gems(self, request, context):
+        try:
+            self.__emit(TradeEvent.GEMS, sender=request.sender, gems=request.gems)
+            return TradeResponse(ack=True)
+        except Exception as e:
+            traceback.print_exception(type(e), e, e.__traceback__)
+            self.__error(request.peerid)
+            return TradeResponse(ack=False)
+    
+    def send_fusion_to_forge(self, trade: Trade):
+        try:
+            token = self.profile_endp.auth()
+            gems = [gem.payload for gem in trade.self_gems.offered]
+            channel = grpc.insecure_channel(self.__forge_addr)
+            stub = ForgeStub(channel)
+            req = FusionRequest(token=token, peerid=trade.peerid, gems=gems)
+            res = stub.fuse(req)
+            if res.error == 'InvalidGems':
+                raise InvalidGemError()
+            if res.error == 'Timeout':
+                raise FusionTimeout()
+            if res.error:
+                raise UnknownError()
+            self.__emit(TradeEvent.GEMS, sender='The Forge', gems=res.gems)
         except Exception as e:
             traceback.print_exception(type(e), e, e.__traceback__)
             raise e
         finally:
-            self.__remove_connection(trade.peerid)
+            self.remove_connection(trade.peerid)

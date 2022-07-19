@@ -1,4 +1,3 @@
-from ctrl.profile import ProfileCtrl
 from datetime import datetime
 from exceptions import InvalidGemError
 from model.gem import Gem
@@ -25,10 +24,6 @@ class CollectionCtrl:
     def load(self):
         self.__gems = Gem.load_all()
         self.__wanted = Wanted.load()
-    
-    def set_identity(self, id, username):
-        self.__id = id
-        self.__username = username
 
     def list_gems(self):
         gems = sorted(self.__gems.values(), key=lambda g: g.name)
@@ -65,16 +60,15 @@ class CollectionCtrl:
         self.__gems.pop(gem.id, None)
 
     def request_gem(self):
-        uid = self.__id
-        gem_raw = self.__collection_endp.request_gem(uid)
+        gem_raw = self.__collection_endp.request_gem()
         gem = self.new_gem(gem_raw)
         self.add_gem(gem)
         return gem
 
-    def new_gem(self, gem_raw: str):
+    def new_gem(self, gem_raw: bytes):
         vkey = self.__verify_key
         try:
-            gem_bytes = vkey.verify(gem_raw, encoder=Base64Encoder)
+            gem_bytes = vkey.verify(gem_raw)
         except BadSignatureError:
             raise InvalidGemError()
         gem = json.loads(gem_bytes)

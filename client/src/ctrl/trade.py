@@ -22,7 +22,7 @@ class TradeCtrl:
         endp.bind(TradeEvent.ACCEPT, lambda peerid, **_: self.accept(self.get_trade(peerid), False))
         endp.bind(TradeEvent.REJECT, lambda peerid, **_: self.reject(self.get_trade(peerid), False))
         endp.bind(TradeEvent.FUSION, lambda peerid, **_: self.fuse(self.get_trade(peerid), False))
-        endp.bind(TradeEvent.GEMS, lambda peerid, gems, **_: self.receive(peerid, gems))
+        endp.bind(TradeEvent.GEMS, lambda sender, gems, **_: self.receive(sender, gems))
         endp.bind(TradeEvent.ERROR, lambda peerid, **_: self.error(self.get_trade(peerid)))
         endp.bind(TradeEvent.CLOSE, lambda peerid, **_: self.close(self.get_trade(peerid)))
 
@@ -54,7 +54,7 @@ class TradeCtrl:
     
     def add_trade(self, trade: Trade):
         if trade.peerid in self.__trades:
-            self.__endpoint.reject(trade)
+            self.__endpoint.send_reject(trade)
         trade.self_gems = self.__collection_ctrl.get_gallery()
         self.__trades[trade.peerid] = trade
         return trade
@@ -67,7 +67,7 @@ class TradeCtrl:
     def start_trade(self, sr: SearchResult, from_self: bool = True):
         if from_self or sr.id not in self.__trades:
             trade = self.add_trade(Trade.from_search_result(sr))
-            self.__endpoint.start(trade)
+            self.__endpoint.send_trade(trade)
             if not from_self:
                 self.__emit(TradeEvent.UPDATE, trade=self.get_trade(sr.id))
         return self.get_trade(sr.id)
@@ -77,7 +77,7 @@ class TradeCtrl:
             return
         if from_self:
             gl = GemList(gems.wanted, [g.name for g in gems.offered])
-            self.__endpoint.update(trade, gl)
+            self.__endpoint.send_update(trade, gl)
             trade.self_gems = gems
             trade.last_update_at = datetime.now()
         else:
@@ -90,7 +90,7 @@ class TradeCtrl:
         if not trade:
             return
         if from_self:
-            self.__endpoint.accept(trade)
+            self.__endpoint.send_accept(trade)
             trade.self_accepted = True
             trade.last_update_at = datetime.now()
         else:
@@ -108,7 +108,7 @@ class TradeCtrl:
             return
         if from_self:
             try:
-                self.__endpoint.reject(trade)
+                self.__endpoint.send_reject(trade)
             finally:
                 self.remove_trade(trade)
         else:
@@ -127,7 +127,7 @@ class TradeCtrl:
         if not trade:
             return
         if from_self:
-            self.__endpoint.fuse(trade)
+            self.__endpoint.send_fuse(trade)
             trade.self_fusion = True
             trade.last_update_at = datetime.now()
         else:
@@ -137,9 +137,8 @@ class TradeCtrl:
             self.__emit(TradeEvent.FUSION, trade=trade)
         if trade.self_fusion and trade.peer_fusion:
             def cb():
-                print(f"TradeCtrl: let's fuuuuuuse")
                 try:
-                    self.__endpoint.fuse_to_forge(trade)
+                    self.__endpoint.send_fusion_to_forge(trade)
                     for gem in trade.self_gems.offered:
                         self.__collection_ctrl.remove_gem(gem)
                 except:
@@ -147,9 +146,8 @@ class TradeCtrl:
             threading.Thread(target=cb).start()
             
     
-    def receive(self, peerid: str, gems):
-        trade = self.get_trade(peerid)
+    def receive(self, sender: str, gems):
         gems = [self.__collection_ctrl.new_gem(g) for g in gems]
         for gem in gems:
             self.__collection_ctrl.add_gem(gem)
-        self.__emit(TradeEvent.GEMS, sender=trade.peername if trade else peerid, gems=gems)
+        self.__emit(TradeEvent.GEMS, sender=sender, gems=gems)

@@ -19,6 +19,9 @@ class FusionRequest:
     def is_complete(self):
         return self.gems_a is not None and self.gems_b is not None
     
+    def is_empty(self):
+        return self.user_a is None and self.user_b is None
+    
     def has_fusion_set(self):
         return self.fusion is not None
     
@@ -191,5 +194,15 @@ class ForgeCtrl:
             if req.is_complete() and not req.has_fusion_set():
                 req.fusion = self.fuse(ida, idb, req)
     
-    def remove_fusion_request(self, ida, idb):
-        self.fusion_requests.pop(self.get_req_key(ida, idb), None)
+    def remove_fusion_request(self, ida, idb, ref):
+        ida, idb = self.get_req_key(ida, idb)
+        with self.__lock:
+            req = self.fusion_requests.get((ida, idb), None)
+            if req is None:
+                return
+            if ref == ida:
+                req.user_a = None
+            else:
+                req.user_b = None
+            if req.is_empty():
+                self.fusion_requests.pop((ida, idb), None)

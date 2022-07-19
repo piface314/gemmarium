@@ -1,37 +1,27 @@
-from exceptions import QuotaError, UnknownError
-from nacl.public import PublicKey
+from exceptions import AuthError, QuotaError, UnknownError
 from network.endpoint import Endpoint
-import socket
+from network.profile import ProfileEndpoint
 
+import grpc
+from rmi.forge_pb2 import GemRequest
+from rmi.forge_pb2_grpc import ForgeStub
 
 class CollectionEndpoint(Endpoint):
 
-    def __init__(self, forge_addr, forge_key: PublicKey):
-        self.__forge_addr = forge_addr
-        self.__forge_key = forge_key
+    def __init__(self, forge_addr, profile_endp: ProfileEndpoint):
+        self.forge_addr = f'{forge_addr[0]}:{forge_addr[1]}'
+        self.profile_endp = profile_endp
 
-    def request_gem(self, id: str):
-        pkey = self.__forge_key
-        with socket.socket() as s:
-            # request
-            s.connect(self.__forge_addr)
-            msg = self.enc_msg(pkey, 'request', id=id)
-            self.send_key(s, pkey)
-            self.send_size(s, pkey, msg)
-            s.sendall(msg)
-            
-            # auth
-            data = s.recv(1024)
-            op, args = self.dec_msg(pkey, data)
-            if op != 'auth':
-                raise UnknownError()
-            msg = self.enc_msg(pkey, 'auth', secret=args['secret'])
-            s.sendall(msg)
-            
-            # recv
-            data = s.recv(4096)
-        op, args = self.dec_msg(pkey, data)
-        if op == 'gem':
-            return args['gem']
-        else:
-            raise QuotaError(args['wait'])
+    def request_gem(self):
+        token = self.profile_endp.auth()
+        channel = grpc.insecure_channel(self.forge_addr)
+        stub = ForgeStub(channel)
+        req = GemRequest(token=token)
+        res = stub.gem(req)
+        if res.error == 'AuthError':
+            raise AuthError()
+        if res.error == 'QuotaExceeded':
+            raise QuotaError(res.wait)
+        if res.error:
+            raise UnknownError()
+        return res.gem

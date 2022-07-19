@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 if [[ -n "$1" ]]; then
   forge_port=$1
-  gem_time=$5
+  gem_time=$2
 else
   forge_port="7514"
   gem_time=10
