@@ -7,7 +7,7 @@ class SearchCtrl:
     def __init__(self, search_endp: SearchEndpoint):
         self.__search_endp = search_endp
 
-    def search(self, query: str, owned: bool, is_local: bool = True, wait: int = 1):
+    def search(self, query: str, owned: bool, is_local: bool = True, wait: float = 1):
         if is_local:
             results = self.__search_endp.local_search(wait=wait)
         else:

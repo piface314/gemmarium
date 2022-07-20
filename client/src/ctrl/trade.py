@@ -69,6 +69,7 @@ class TradeCtrl:
             trade = self.add_trade(Trade.from_search_result(sr))
             self.__endpoint.send_trade(trade)
             if not from_self:
+                trade.unseen = True
                 self.__emit(TradeEvent.UPDATE, trade=self.get_trade(sr.id))
         return self.get_trade(sr.id)
 
