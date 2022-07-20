@@ -15,6 +15,7 @@ from rmi.vault_pb2_grpc import AuthStub
 forge_vkey = VerifyKey(keys.forge_vkey)
 forge_signkey = SigningKey(keys.forge_sign_key)
 vault_pkey = PublicKey(keys.vault_pkey)
+vault_vkey = VerifyKey(keys.vault_vkey)
 
 client_keys = {
     '322d85b6-2188-4494-aba1-be9519c5f729': (
@@ -79,20 +80,15 @@ def request_fusion(uid, peerid):
 
 def find_fusion():
     db = Database()
-    ctrl = ForgeCtrl(db, 10, forge_signkey, forge_vkey, keys.auth_key)
-    gems_a = [{'tag': 'alexandrite'}, {'tag': 'sapphire'}]
+    ctrl = ForgeCtrl(db, 10, forge_signkey, forge_vkey, vault_vkey)
+    gems_a = [{'tag': 'alexandrite'}, {'tag': 'garnet'}, {'tag': 'sapphire'}]
     gems_b = [{'tag': 'rose-quartz'}, {'tag': 'ruby'}]
-    req = FusionReqModel()
-    req.user_a = 'alice'
-    req.user_b = 'bob'
-    req.gems_a = gems_a
-    req.gems_b = gems_b
-    print(ctrl.fuse(req))
+    print(ctrl.find_fusion(gems_a, gems_b))
     
 
-# find_fusion()
-alice = '322d85b6-2188-4494-aba1-be9519c5f729'
-bob = '3b089561-0033-4b79-b691-1f0842898e7a'
+find_fusion()
+# alice = '322d85b6-2188-4494-aba1-be9519c5f729'
+# bob = '3b089561-0033-4b79-b691-1f0842898e7a'
 # request_gem(alice)
-threading.Thread(target=request_fusion, args=(alice, bob)).start()
-threading.Thread(target=request_fusion, args=(bob, alice)).start()
+# threading.Thread(target=request_fusion, args=(alice, bob)).start()
+# threading.Thread(target=request_fusion, args=(bob, alice)).start()

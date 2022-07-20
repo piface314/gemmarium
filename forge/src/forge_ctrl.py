@@ -142,8 +142,8 @@ class ForgeCtrl:
             if m not in self.fusions:
                 continue
             mat = self.fusions[m]
-            am = am - mat
-            bm = bm - mat
+            am = am - self.materials(m, mat, am)
+            bm = bm - self.materials(m, mat, bm)
         shared = am & bm
         am, bm = am - shared, bm - shared
         while shared:
