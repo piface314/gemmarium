@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/logo.png" width="200" alt="YGOFabrica logo"></p>
+<p align="center"><img src="docs/logo.png" width="200" alt="Gemmarium logo"></p>
 
 Trabalho prático da disciplina CCF355 - Sistemas Distribuídos e Paralelos, da Universidade Federal de Viçosa Campus Florestal. Trata-se de um sistema de visualização e troca de gemas mágicas virtuais.
 
