@@ -5,10 +5,6 @@ from nacl.signing import SigningKey, VerifyKey
 from sys import argv
 import keys
 
-from concurrent.futures import ThreadPoolExecutor
-from rmi.forge_pb2_grpc import add_ForgeServicer_to_server
-import grpc
-
 
 if __name__ == '__main__':
     port, gem_time = argv[1:5]
@@ -21,11 +17,5 @@ if __name__ == '__main__':
         vault_vkey=VerifyKey(keys.vault_vkey)
     )
     endp = ForgeEndpoint(ctrl)
-    server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    add_ForgeServicer_to_server(endp, server)
-    server.add_insecure_port(f'[::]:{port}')
     print(f"Forge started!")
-    server.start()
-    server.wait_for_termination()
-
-    
+    endp.app.run(port=port, debug=True)

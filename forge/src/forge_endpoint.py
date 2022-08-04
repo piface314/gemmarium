@@ -1,59 +1,57 @@
+from flask import Flask, request
 from forge_ctrl import ForgeCtrl
 from time import time
-from rmi.forge_pb2_grpc import ForgeServicer
-from rmi.forge_pb2 import GemResponse, FusionResponse
+import base64
 import traceback
 
 
-class ForgeEndpoint(ForgeServicer):
+class ForgeEndpoint:
 
     def __init__(self, ctrl: ForgeCtrl):
         self.ctrl = ctrl
+        self.app = Flask(__name__)
+        self.app.route("/gem", methods=["GET"])(self.gem)
+        self.app.route("/fuse", methods=["POST"])(self.fuse)
 
-    def gem(self, request, context):
-        print(f"{context.peer()}: gem({str(request).strip()})")
-        uid, username = self.ctrl.auth(request.token)
+    def gem(self):
+        token = request.args.get('token')
+        uid, username = self.ctrl.auth(base64.b64decode(token))
         if not uid:
-            return GemResponse(error="AuthError")
-        print(f"{context.peer()}: checking quota for {username}...")
+            return dict(error="AuthError"), 401
         ok, wait = self.ctrl.check_quota(uid)
         if not ok:
-            return GemResponse(error="QuotaExceeded", wait=wait)
-        print(f"{context.peer()}: choosing gem...")
+            return dict(error="QuotaExceeded", wait=wait), 418
         gem = self.ctrl.choose_gem(username)
         self.ctrl.set_quota(uid)
-        return GemResponse(gem=gem)
+        return dict(gem=base64.b64encode(gem).decode())
     
-    def fuse(self, request, context):
-        print(f"{context.peer()}: fuse({str(request).strip()})")
-        uid, username = self.ctrl.auth(request.token)
+    def fuse(self):
+        body = request.get_json()
+        uid, username = self.ctrl.auth(base64.b64decode(body['token']))
         if not uid:
-            return FusionResponse(error="AuthError")
-        print(f"{context.peer()}: attempting fusion...")
-        peerid, gems = request.peerid, [g for g in request.gems]
+            return dict(error="AuthError"), 401
+        peerid, gems = body['peerid'], [base64.b64decode(g) for g in body['gems']]
         try:
             self.ctrl.update_fusion_request(uid, peerid, uid, username, gems)
         except Exception as e:
             traceback.print_exception(type(e), e, e.__traceback__)
             self.ctrl.remove_fusion_request(uid, peerid)
-            return FusionResponse(error="InvalidGems")
+            return dict(error="InvalidGems"), 400
         t0, ok = time(), False
-        print(f'{context.peer()}: waiting for peer...')
         try:
             while time() - t0 <= 60:
                 req = self.ctrl.get_fusion_request(uid, peerid)
                 if req.is_complete() and req.has_fusion_set():
-                    print(f'{context.peer()}: peer connected')
                     ok = True
                     break
         except:
             pass
         if not ok:
-            print(f'{context.peer()}: timeout')
-            return FusionResponse(error="Timeout")
+            return dict(error="Timeout"), 408
         req = self.ctrl.get_fusion_request(uid, peerid)
         fused, others = req.fusion
         gems = [fused, *others[uid]] if fused else others[uid]
+        gems = [base64.b64encode(g).decode() for g in gems]
         self.ctrl.remove_fusion_request(uid, peerid, uid)
-        return FusionResponse(gems=gems)
+        return dict(gems=gems)
         

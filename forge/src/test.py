@@ -1,16 +1,13 @@
+import base64
 from database import Database
 from forge_ctrl import ForgeCtrl
 from forge_ctrl import FusionRequest as FusionReqModel
 from nacl.public import PrivateKey, PublicKey, Box, SealedBox
+from nacl.encoding import Base64Encoder
 from nacl.signing import VerifyKey, SigningKey
 import keys
+import requests
 import threading
-
-import grpc
-from rmi.forge_pb2 import GemRequest, FusionRequest
-from rmi.forge_pb2_grpc import ForgeStub
-from rmi.vault_pb2 import AuthRequest
-from rmi.vault_pb2_grpc import AuthStub
 
 forge_vkey = VerifyKey(keys.forge_vkey)
 forge_signkey = SigningKey(keys.forge_sign_key)
@@ -39,44 +36,30 @@ client_gems = {
 }
 
 def request_auth(uid):
-    channel = grpc.insecure_channel('localhost:7513')
-    stub = AuthStub(channel)
-    res = [None, None]
-    def auth():
-        req = AuthRequest(id=uid)
-        print(f"sending {req}")
-        yield req
-        while not res[0]:
-            pass
-        print(f"res[0] = {res[0]}")
-        if res[0].error:
-            print(res[0].error)
-            return
-        secret = SealedBox(client_keys[uid][0]).decrypt(res[0].secret)
-        secret = Box(client_keys[uid][0], vault_pkey).encrypt(secret)
-        yield AuthRequest(secret=secret)
-
-    for i, r in enumerate(stub.auth(auth())):
-        res[i] = r
-    return res[1].token
+    res = requests.get('http://127.0.0.1:7513/auth', params=dict(id=uid))
+    print(res)
+    secret = res.json()['secret']
+    secret = SealedBox(client_keys[uid][0]).decrypt(secret, Base64Encoder)
+    secret = Box(client_keys[uid][0], vault_pkey).encrypt(secret, encoder=Base64Encoder).decode()
+    res2 = requests.post('http://127.0.0.1:7513/auth', params=dict(id=uid), json=dict(
+        secret = secret
+    ))
+    print(res2)
+    return res2.json()['token']
 
 def request_gem(uid):
     token = request_auth(uid)
     print(f"my token: {token}")
-    channel = grpc.insecure_channel('localhost:7514')
-    stub = ForgeStub(channel)
-    req = GemRequest(token=token)
-    res = stub.gem(req)
-    print(res.gem)
+    res = requests.get("http://127.0.0.1:7514/gem", params=dict(token=token))
+    print(res)
+    print(res.json())
 
 def request_fusion(uid, peerid):
     token = request_auth(uid)
-    gems = client_gems[uid]
-    channel = grpc.insecure_channel('localhost:7514')
-    stub = ForgeStub(channel)
-    req = FusionRequest(token=token, peerid=peerid, gems=gems)
-    res = stub.fuse(req)
+    gems = [base64.b64encode(g).decode() for g in client_gems[uid]]
+    res = requests.post("http://127.0.0.1:7514/fuse", json=dict(token=token,peerid=peerid,gems=gems))
     print(res)
+    print(res.json())
 
 def find_fusion():
     db = Database()
@@ -86,9 +69,9 @@ def find_fusion():
     print(ctrl.find_fusion(gems_a, gems_b))
     
 
-find_fusion()
-# alice = '322d85b6-2188-4494-aba1-be9519c5f729'
-# bob = '3b089561-0033-4b79-b691-1f0842898e7a'
+# find_fusion()
+alice = '322d85b6-2188-4494-aba1-be9519c5f729'
+bob = '3b089561-0033-4b79-b691-1f0842898e7a'
 # request_gem(alice)
-# threading.Thread(target=request_fusion, args=(alice, bob)).start()
-# threading.Thread(target=request_fusion, args=(bob, alice)).start()
+threading.Thread(target=request_fusion, args=(alice, bob)).start()
+threading.Thread(target=request_fusion, args=(bob, alice)).start()
