@@ -57,7 +57,7 @@ def request_gem(uid):
 def request_fusion(uid, peerid):
     token = request_auth(uid)
     gems = [base64.b64encode(g).decode() for g in client_gems[uid]]
-    res = requests.post("http://127.0.0.1:7514/fuse", json=dict(token=token,peerid=peerid,gems=gems))
+    res = requests.post("http://127.0.0.1:7514/fusion", json=dict(token=token,peerid=peerid,gems=gems))
     print(res)
     print(res.json())
 

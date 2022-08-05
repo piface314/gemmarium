@@ -11,7 +11,7 @@ class ForgeEndpoint:
         self.ctrl = ctrl
         self.app = Flask(__name__)
         self.app.route("/gem", methods=["GET"])(self.gem)
-        self.app.route("/fuse", methods=["POST"])(self.fuse)
+        self.app.route("/fusion", methods=["POST"])(self.fuse)
 
     def gem(self):
         token = request.args.get('token')
