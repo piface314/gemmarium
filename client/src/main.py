@@ -21,12 +21,10 @@ from network.search import SearchEndpoint
 from network.trade import TradeEndpoint
 from sys import argv
 from view.client import ClientApp
+from werkzeug import serving
 import keys
 import threading
 
-from concurrent.futures import ThreadPoolExecutor
-from rmi.client_pb2_grpc import add_TradeServicer_to_server
-import grpc
 
 if __name__ == '__main__':
     search_port, vault_ip, vault_port, forge_ip, forge_port, db_fp, offset = argv[1:8]
@@ -66,13 +64,17 @@ if __name__ == '__main__':
     collection_ctrl.sync_gallery()
 
     threading.Thread(target=search_endp.listen, daemon=True).start()
-    server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    add_TradeServicer_to_server(trade_endp, server)
-    trade_port = server.add_insecure_port(f'[::]:0')
+    server = serving.make_server(
+            host='', 
+            port=0, 
+            app=trade_endp.app,
+            threaded=True)
+    trade_port = server.socket.getsockname()[1]
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+
     search_endp.set_trade_port(trade_port)
     trade_endp.set_port(trade_port)
     print(f"TradeEndpoint started on port {trade_port}!")
-    server.start()
 
     ClientApp(
         collection_ctrl,
